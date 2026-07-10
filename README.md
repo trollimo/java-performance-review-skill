@@ -1,4 +1,4 @@
-# 🚀 Java Performance Reviewer Skill
+﻿# рџљЂ Java Performance Reviewer Skill
 
 > **A knowledge base for AI agents that perform static performance reviews of Java Enterprise repositories.**
 
@@ -6,7 +6,7 @@ Detect real and potential performance bottlenecks, scalability risks, and archit
 
 ---
 
-## 🎯 Purpose
+## рџЋЇ Purpose
 
 This project enables AI agents to identify real and potential performance issues before they reach production.
 
@@ -14,58 +14,58 @@ Unlike traditional linters, it focuses on **performance engineering** rather tha
 
 ---
 
-## 🛠 Supported Technologies
+## рџ›  Supported Technologies
 
-- ☕ Java
-- 🌱 Spring Framework / Spring Boot
-- 🗄 Hibernate / JPA
-- ⚡ jOOQ
-- 📝 SQL
-- 🐘 PostgreSQL
-- 🏛 Sybase
-- 🔄 Liquibase
-- 📨 Kafka
-- 📬 ActiveMQ
-- 🌐 REST
-- 📖 OpenAPI
-- 🔌 WebSocket
-- ☸ Kubernetes
-- ⚓ Helm
-
----
-
-## 🔍 What the Skill Detects
-
-- 🚨 SQL and Hibernate N+1 queries
-- 📑 Missing or inefficient indexes
-- ⏱ Long-running transactions
-- 🔒 Lock contention
-- 📦 Collection and Stream inefficiencies
-- 🧠 JVM allocation hotspots
-- 🚦 Blocking I/O
-- 📨 Kafka producer/consumer bottlenecks
-- 📊 Batch processing issues
-- 🧵 Thread contention
-- 📈 Scalability blockers
-- 🏗 Distributed architecture bottlenecks
-- 🔗 Microservice communication anti-patterns
+- в• Java
+- рџЊ± Spring Framework / Spring Boot
+- рџ—„ Hibernate / JPA
+- вљЎ jOOQ
+- рџ“ќ SQL
+- рџђ PostgreSQL
+- рџЏ› Sybase
+- рџ”„ Liquibase
+- рџ“Ё Kafka
+- рџ“¬ ActiveMQ
+- рџЊђ REST
+- рџ“– OpenAPI
+- рџ”Њ WebSocket
+- вё Kubernetes
+- вљ“ Helm
 
 ---
 
-## ✨ Features
+## рџ”Ќ What the Skill Detects
 
-- ✅ Evidence-based findings
-- 🚦 Severity prioritization
-- 🎯 Confidence level for every issue
-- 🏗 Architecture analysis
-- 📈 Scalability analysis
-- 👀 Manual verification recommendations
-- 📋 Executive summary generation
-- 🌍 System-wide bottleneck detection
+- рџљЁ SQL and Hibernate N+1 queries
+- рџ“‘ Missing or inefficient indexes
+- вЏ± Long-running transactions
+- рџ”’ Lock contention
+- рџ“¦ Collection and Stream inefficiencies
+- рџ§  JVM allocation hotspots
+- рџљ¦ Blocking I/O
+- рџ“Ё Kafka producer/consumer bottlenecks
+- рџ“Љ Batch processing issues
+- рџ§µ Thread contention
+- рџ“€ Scalability blockers
+- рџЏ— Distributed architecture bottlenecks
+- рџ”— Microservice communication anti-patterns
 
 ---
 
-## 📁 Repository Structure
+## вњЁ Features
+
+- вњ… Evidence-based findings
+- рџљ¦ Severity prioritization
+- рџЋЇ Confidence level for every issue
+- рџЏ— Architecture analysis
+- рџ“€ Scalability analysis
+- рџ‘Ђ Manual verification recommendations
+- рџ“‹ Executive summary generation
+- рџЊЌ System-wide bottleneck detection
+
+---
+
+## рџ“Ѓ Repository Structure
 
 ```text
 SKILL.md                Entry point for AI agents
@@ -77,11 +77,11 @@ taxonomy/               Rule classification
 
 ---
 
-## 🚀 Usage
+## рџљЂ Usage
 
 Provide the target repository together with this Skill to your AI coding agent.
 
-### 💬 Example Prompt
+### рџ’¬ Example Prompt
 
 ```text
 Analyze this repository using this Skill and identify real and potential performance issues. Prioritize findings by severity and provide evidence-based recommendations.
@@ -89,23 +89,23 @@ Analyze this repository using this Skill and identify real and potential perform
 
 ---
 
-## 📐 Design Principles
+## рџ“ђ Design Principles
 
-- 🧾 Evidence over assumptions
-- 🚫 No false positives by design
-- 🧩 Technology-specific expertise
-- 🌍 System-level analysis
-- 📚 Scalable knowledge base
-- 🔧 Easy to extend
+- рџ§ѕ Evidence over assumptions
+- рџљ« No false positives by design
+- рџ§© Technology-specific expertise
+- рџЊЌ System-level analysis
+- рџ“љ Scalable knowledge base
+- рџ”§ Easy to extend
 
 ---
 
-## 📌 Status
+## рџ“Њ Status
 
-**🟢 MVP**
+**рџџў MVP**
 
 Designed to grow incrementally by adding new technologies and performance practices while maintaining a consistent rule structure.
 
 ---
 
-⭐ **Contributions, improvements, and new performance rules are welcome!**
+в­ђ **Contributions, improvements, and new performance rules are welcome!**

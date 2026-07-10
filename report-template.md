@@ -1,10 +1,26 @@
-# Performance Review Report Template
+﻿# 🚂 Performance Review Report Template
 
 Version: 1.0
 
 ---
 
-# Общие требования
+# 📄 Формат отчета
+
+Отчет по умолчанию записывается в файл report.md в корне репозитория.
+
+Также доступен HTML-формат (report.html) с:
+
+- таблицами
+- цветовыми метками severity
+- сворачиваемыми секциями
+- подсветкой кода (highlight.js)
+- адаптивным дизайном
+
+Для HTML-формата использовать шаблон report-template.html.
+
+---
+
+# 📋 Общие требования
 
 Отчет должен быть структурирован.
 
@@ -18,7 +34,7 @@ Version: 1.0
 
 ---
 
-# Executive Summary
+# 📊 Executive Summary
 
 Кратко описать систему.
 
@@ -32,7 +48,7 @@ Version: 1.0
 
 Пример
 
-```
+`
 Проанализировано:
 
 7 микросервисов
@@ -70,11 +86,11 @@ Performance Risk
 84
 
 Основной риск связан с чрезмерной нагрузкой на БД, несколькими N+1, отсутствием batching и длинными синхронными REST-цепочками.
-```
+`
 
 ---
 
-# Repository Overview
+# 📁 Repository Overview
 
 Указать
 
@@ -96,7 +112,7 @@ Performance Risk
 
 ---
 
-# Technology Stack
+# 🛠 Technology Stack
 
 Определить
 
@@ -130,7 +146,7 @@ WebSocket
 
 ---
 
-# Architecture Overview
+# 🏗 Architecture Overview
 
 Попытаться определить
 
@@ -156,7 +172,7 @@ Streaming
 
 ---
 
-# Performance Score
+# 🎯 Performance Score
 
 Вывести
 
@@ -172,7 +188,7 @@ Scalability Risk
 
 ---
 
-# Critical Issues
+# 🚨 Critical Issues
 
 Для каждой проблемы использовать формат
 
@@ -240,25 +256,25 @@ HIB-014
 
 ---
 
-# High Issues
+# ⚠️ High Issues
 
 Использовать тот же формат.
 
 ---
 
-# Medium Issues
+# 🔶 Medium Issues
 
 Использовать тот же формат.
 
 ---
 
-# Low Issues
+# 🔹 Low Issues
 
 Использовать тот же формат.
 
 ---
 
-# Architecture Findings
+# 🏛 Architecture Findings
 
 Перечислить
 
@@ -294,7 +310,7 @@ Database
 
 ---
 
-# Scalability Findings
+# 📈 Scalability Findings
 
 Проверить
 
@@ -316,7 +332,7 @@ batching
 
 ---
 
-# Java Findings
+# ☕ Java Findings
 
 Сгруппировать проблемы
 
@@ -338,7 +354,7 @@ Algorithms
 
 ---
 
-# Spring Findings
+# 🌱 Spring Findings
 
 Transactions
 
@@ -356,7 +372,7 @@ Configuration
 
 ---
 
-# Hibernate Findings
+# 🗄 Hibernate Findings
 
 N+1
 
@@ -378,7 +394,7 @@ Cache
 
 ---
 
-# SQL Findings
+# 📝 SQL Findings
 
 Indexes
 
@@ -396,7 +412,7 @@ Window Functions
 
 ---
 
-# PostgreSQL Findings
+# 🐘 PostgreSQL Findings
 
 Execution Plans
 
@@ -418,7 +434,7 @@ Statistics
 
 ---
 
-# Messaging Findings
+# 📨 Messaging Findings
 
 Kafka
 
@@ -438,7 +454,7 @@ ActiveMQ
 
 ---
 
-# Kubernetes Findings
+# ☸ Kubernetes Findings
 
 Requests
 
@@ -462,7 +478,7 @@ Startup Probe
 
 ---
 
-# Helm Findings
+# ⚓ Helm Findings
 
 Если Helm найден
 
@@ -493,7 +509,7 @@ Helm Chart не найден.
 
 ---
 
-# Liquibase Findings
+# 🔄 Liquibase Findings
 
 Если найден
 
@@ -517,7 +533,7 @@ rollback
 
 ---
 
-# Technical Debt
+# 🏚 Technical Debt
 
 Перечислить
 
@@ -531,7 +547,7 @@ rollback
 
 ---
 
-# Top 10 Fixes
+# 🔧 Top 10 Fixes
 
 Отсортировать по ожидаемому эффекту.
 
@@ -549,7 +565,7 @@ Priority
 
 ---
 
-# Manual Review Required
+# 👀 Manual Review Required
 
 Вывести список того,
 
@@ -577,7 +593,7 @@ Grafana
 
 ---
 
-# Positive Findings
+# ✅ Positive Findings
 
 Указать
 
@@ -601,7 +617,7 @@ Grafana
 
 ---
 
-# Final Conclusion
+# 🏁 Final Conclusion
 
 Краткий вывод.
 

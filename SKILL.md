@@ -1,4 +1,4 @@
-# Java Performance Reviewer Skill
+﻿# Java Performance Reviewer Skill
 
 Version: 1.0 MVP
 
@@ -368,6 +368,48 @@ Manual Helm Review
 ## Top 10 Improvements
 
 ## Estimated Performance Impact
+
+---
+
+# Report Output Format
+
+По умолчанию отчет записывается в файл `report.md` в корне анализируемого репозитория.
+
+Пользователь может выбрать формат
+
+- Markdown (по умолчанию)
+- HTML
+
+## Markdown Output
+
+Агент записывает файл `report.md` в корень репозитория.
+
+Файл должен содержать полный отчет в формате Markdown.
+
+Использовать шаблон report-template.md как основу структуры.
+
+## HTML Output
+
+Агент записывает файл `report.html` в корень репозитория.
+
+Использовать шаблон report-template.html как основу.
+
+HTML-отчет должен содержать
+
+- Table of Contents с якорными ссылками
+- Executive Summary с метриками
+- Сворачиваемые секции для каждого уровня severity
+- Таблицы для Repository Overview и Top 10 Fixes
+- Цветовые метки severity (Critical, High, Medium, Low, Info)
+- Подсветку кода через highlight.js (CDN)
+- Адаптивный дизайн
+
+## File Naming
+
+- Markdown: report.md
+- HTML: report.html
+
+Если пользователь указал свой путь — использовать его.
 
 ---
 
