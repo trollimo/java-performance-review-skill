@@ -124,6 +124,132 @@ Parallel Streams
 
 ---
 
+## KT
+
+Язык Kotlin (JVM)
+
+Диапазон
+
+KT-001 ... KT-999
+
+Выделенные блоки
+
+KT-001 ... KT-040 — Core (`rules/kotlin/core.md`)
+
+KT-041 ... KT-070 — Coroutines (`rules/kotlin/coroutines.md`)
+
+KT-071 ... KT-100 — Kotlin + Spring/JPA (`rules/kotlin/jvm-spring.md`)
+
+Разделы
+
+Collections
+
+Sequences
+
+Strings
+
+Boxing
+
+Coroutines
+
+Dispatchers
+
+Flow
+
+Channels
+
+Cancellation
+
+Spring
+
+Hibernate
+
+Serialization
+
+---
+
+## PY
+
+Язык Python
+
+Диапазон
+
+PY-001 ... PY-999
+
+Выделенные блоки
+
+PY-001 ... PY-040 — Core (`rules/python/core.md`)
+
+PY-041 ... PY-070 — asyncio, FastAPI, aiohttp, httpx (`rules/python/asyncio.md`)
+
+Разделы
+
+Collections
+
+Strings
+
+Memory
+
+GIL
+
+Threads
+
+Logging
+
+asyncio
+
+Event Loop
+
+Timeouts
+
+Connection Pools
+
+Backpressure
+
+---
+
+## DJ
+
+Django, Django REST Framework, Celery
+
+Диапазон
+
+DJ-001 ... DJ-999
+
+Выделенные блоки
+
+DJ-001 ... DJ-030 — ORM (`rules/django/orm.md`)
+
+DJ-031 ... DJ-060 — Views, DRF, Celery, настройки (`rules/django/views-drf-celery.md`)
+
+Разделы
+
+ORM
+
+QuerySet
+
+Indexes
+
+Pagination
+
+DRF
+
+Serializers
+
+Transactions
+
+Celery
+
+Cache
+
+Settings
+
+Middleware
+
+Signals
+
+---
+
 ## SPR
 
 Spring Framework

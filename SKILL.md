@@ -7,7 +7,7 @@ Version: 1.0 MVP
 # Purpose
 
 Данный Skill предназначен для поиска реальных и потенциальных проблем производительности
-в Java-репозиториях.
+в репозиториях на Java, Kotlin и Python (включая Django и asyncio).
 
 Основная задача — выполнить архитектурный Performance Review и сформировать отчет,
 приоритизированный по критичности и ожидаемому эффекту.
@@ -24,6 +24,9 @@ Version: 1.0 MVP
 # Supported Technologies
 
 - Java
+- Kotlin (JVM, корутины, Spring/JPA)
+- Python (core, asyncio, FastAPI/aiohttp/httpx)
+- Django (ORM, DRF, Celery)
 - Spring Framework
 - Spring Boot
 - Hibernate / JPA
@@ -100,6 +103,9 @@ Scalability
 
 Не предлагать более восьми вариантов.
 
+Режимы 3 и 4 применяются только к тем языкам и фреймворкам,
+которые обнаружены в репозитории (см. checklist.md, Technology Detection).
+
 ## 1. Full Performance Review
 
 Полный анализ всего репозитория.
@@ -122,29 +128,22 @@ Scalability
 
 ---
 
-## 3. Java Review
+## 3. Language Review
 
 Проверять
 
-- Java
-- Collections
-- Streams
-- Concurrency
-- Memory
-- JVM
+- Java: Collections, Streams, Concurrency, Memory, JVM
+- Kotlin: Collections/Sequences, Coroutines, Kotlin + Spring/JPA
+- Python: Core, asyncio, GIL и многопоточность, память
 
 ---
 
-## 4. Spring Review
+## 4. Framework Review
 
 Проверять
 
-- Spring
-- Transactions
-- REST
-- Dependency Injection
-- Scheduling
-- Cache
+- Spring: Transactions, REST, Dependency Injection, Scheduling, Cache
+- Django: ORM, DRF, Celery, настройки, middleware и signals
 
 ---
 
@@ -323,6 +322,18 @@ Low
 
 - JVM Metrics
 
+- JFR (Java Flight Recorder), async-profiler
+
+- Профилирование корутин (kotlinx-coroutines-debug, DebugProbes)
+
+- py-spy, cProfile, tracemalloc, memray
+
+- Django Debug Toolbar, django-silk, `connection.queries`
+
+- Celery Flower, метрики очередей и времени выполнения задач
+
+- Метрики event loop (asyncio debug mode, lag event loop)
+
 - GC Logs
 
 - Prometheus
@@ -432,7 +443,7 @@ HTML-отчет должен содержать
 Любая найденная проблема должна содержать
 ссылку
 
-- на Java-класс
+- на Java-класс, Kotlin-класс или Python-модуль
 
 или
 

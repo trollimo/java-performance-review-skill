@@ -33,7 +33,11 @@ Repository
 
 ↓
 
-Анализ Spring
+Анализ Kotlin / Python / asyncio (если обнаружены)
+
+↓
+
+Анализ Spring / Django (если обнаружены)
 
 ↓
 
@@ -81,6 +85,20 @@ Repository
 Определить
 
 Java
+
+Kotlin (`*.kt`, `build.gradle.kts`, плагины `kotlin("jvm")`, `kotlin("plugin.spring")`)
+
+Python (`*.py`, `pyproject.toml`, `requirements*.txt`, `Pipfile`, `poetry.lock`)
+
+Django (`manage.py`, `settings.py`, `django` в зависимостях)
+
+Django REST Framework (`rest_framework`)
+
+Celery (`celery` в зависимостях, `@shared_task`, `@app.task`)
+
+asyncio (`async def`, `asyncio`, FastAPI, aiohttp, httpx, Starlette)
+
+kotlinx.coroutines (`suspend`, `launch`, `async`, `Flow`)
 
 Spring Boot
 
@@ -267,6 +285,207 @@ OutputStream
 NIO
 
 memory mapping
+
+---
+
+# Шаг 3.1
+
+## Kotlin
+
+Выполнять, если в репозитории найден Kotlin.
+Все проверки Java (шаг 3), Spring, Hibernate и JVM применимы к Kotlin-коду.
+
+Правила: `rules/kotlin/core.md`, `rules/kotlin/coroutines.md`, `rules/kotlin/jvm-spring.md`
+
+Проверить
+
+### Collections
+
+цепочки map/filter без Sequence
+
+`+` и `+=` на неизменяемых коллекциях в цикле
+
+поиск `in` по List
+
+Regex() в цикле
+
+конкатенация строк в цикле
+
+---
+
+### Coroutines
+
+runBlocking
+
+блокирующие вызовы на Default и event loop
+
+GlobalScope
+
+async/launch без ограничения параллелизма
+
+последовательные независимые suspend-вызовы
+
+Flow без buffer и conflate
+
+Channel и SharedFlow без ограничений
+
+Mutex и synchronized
+
+CancellationException
+
+---
+
+### Kotlin + Spring/JPA
+
+data class как Entity
+
+плагины kotlin-spring и kotlin-jpa
+
+suspend + @Transactional
+
+блокирующий JPA в suspend и WebFlux
+
+ObjectMapper
+
+Sequence и Stream за пределами транзакции
+
+runBlocking в @Scheduled и @Async
+
+---
+
+# Шаг 3.2
+
+## Python
+
+Выполнять, если в репозитории найден Python.
+
+Правила: `rules/python/core.md`
+
+Проверить
+
+list вместо set в поиске
+
+конкатенация строк
+
+дорогая инициализация на каждый вызов (re.compile, клиенты, модели)
+
+HTTP без Session
+
+загрузка целиком в память
+
+list вместо generator
+
+неограниченные кэши и утечки
+
+eager-форматирование логов
+
+CPU-bound код в потоках (GIL)
+
+---
+
+# Шаг 3.3
+
+## asyncio
+
+Выполнять, если в репозитории найден async/await (FastAPI, aiohttp, httpx, Starlette).
+
+Правила: `rules/python/asyncio.md`
+
+Проверить
+
+блокирующие вызовы в async def
+
+CPU-bound работа в event loop
+
+последовательные await вместо gather
+
+gather без ограничения
+
+create_task без ссылки
+
+HTTP-клиент на каждый запрос
+
+таймауты
+
+asyncio.run на горячем пути
+
+пул потоков FastAPI (sync def, run_in_threadpool)
+
+очереди без ограничения
+
+лимиты пулов соединений
+
+глобальные Lock
+
+CancelledError
+
+число процессов и воркеров
+
+---
+
+# Шаг 3.4
+
+## Django
+
+Выполнять, если в репозитории найден Django.
+
+Правила: `rules/django/orm.md`, `rules/django/views-drf-celery.md`
+
+Проверить
+
+### ORM
+
+N+1 (ForeignKey, ManyToMany)
+
+len(qs), list(qs), if qs
+
+only, defer, values
+
+iterator()
+
+save() и create() в цикле
+
+F() и атомарные обновления
+
+get_or_create в цикле
+
+индексы для filter и order_by
+
+пагинация и OFFSET
+
+__in с большими списками
+
+icontains
+
+---
+
+### Views, DRF, Celery, настройки
+
+сериализаторы DRF
+
+пагинация
+
+внешние вызовы внутри транзакции
+
+HTTP без таймаута во view
+
+Celery delay без on_commit
+
+delay() в цикле
+
+размер аргументов и результатов Celery
+
+лимиты и очереди задач
+
+CONN_MAX_AGE
+
+кэш (LocMemCache)
+
+DEBUG
+
+signals и middleware
+
+async views
 
 ---
 

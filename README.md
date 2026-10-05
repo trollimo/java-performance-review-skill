@@ -1,6 +1,6 @@
 ﻿# 🚀 Java Performance Reviewer Skill
 
-> **A knowledge base for AI agents that perform static performance reviews of Java Enterprise repositories.**
+> **A knowledge base for AI agents that perform static performance reviews of Java, Kotlin and Python (Django, asyncio) repositories.**
 
 Detect real and potential performance bottlenecks, scalability risks, and architecture issues **before they reach production**.
 
@@ -17,6 +17,9 @@ Unlike traditional linters, it focuses on **performance engineering** rather tha
 ## 🛠 Supported Technologies
 
 - ☕ Java
+- 🟣 Kotlin (coroutines, Spring/JPA)
+- 🐍 Python (core, asyncio, FastAPI/aiohttp/httpx)
+- 🎸 Django (ORM, DRF, Celery)
 - 🌱 Spring Framework / Spring Boot
 - 🗄 Hibernate / JPA
 - ⚡ jOOQ
@@ -46,6 +49,9 @@ Unlike traditional linters, it focuses on **performance engineering** rather tha
 - 📨 Kafka producer/consumer bottlenecks
 - 📊 Batch processing issues
 - 🧵 Thread contention
+- 🐍 Blocking calls in async code, event loop starvation, missing timeouts
+- 🎸 Django ORM N+1, missing `on_commit` for Celery, external calls inside transactions
+- 🟣 Kotlin coroutine misuse (`runBlocking`, blocking on `Dispatchers.Default`, swallowed cancellation)
 - 📈 Scalability blockers
 - 🏗 Distributed architecture bottlenecks
 - 🔗 Microservice communication anti-patterns
@@ -71,6 +77,7 @@ Unlike traditional linters, it focuses on **performance engineering** rather tha
 ```text
 SKILL.md                Entry point for AI agents
 rules/                  Technology-specific performance rules
+                        (java, kotlin, python, django, spring, hibernate, ...)
 docs/                   Documentation and maintenance guides
 prompts/                Example prompts
 taxonomy/               Rule classification

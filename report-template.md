@@ -118,6 +118,12 @@ Performance Risk
 
 Java
 
+Kotlin
+
+Python
+
+Django
+
 Spring
 
 Hibernate
@@ -351,6 +357,58 @@ Reflection
 Exceptions
 
 Algorithms
+
+---
+
+# 🟣 Kotlin Findings
+
+Выполнять, если в репозитории найден Kotlin.
+
+Collections
+
+Coroutines
+
+Dispatchers
+
+Flow
+
+Kotlin + Spring/JPA
+
+---
+
+# 🐍 Python Findings
+
+Выполнять, если в репозитории найден Python.
+
+Core
+
+asyncio
+
+Event Loop
+
+Timeouts
+
+Connection Pools
+
+Memory
+
+---
+
+# 🎸 Django Findings
+
+Выполнять, если в репозитории найден Django.
+
+ORM
+
+DRF
+
+Celery
+
+Transactions
+
+Settings
+
+Cache
 
 ---
 
