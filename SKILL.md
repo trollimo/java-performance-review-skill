@@ -1,6 +1,6 @@
 ﻿# Java Performance Reviewer Skill
 
-Version: 1.0 MVP
+Version: 1.1
 
 ---
 
