@@ -26,6 +26,12 @@ Algorithms
 
 ---
 
+### Grep
+
+`*.py` :: `\b(not )?in \[|\.index\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -120,6 +126,12 @@ Strings
 
 ---
 
+### Grep
+
+`*.py` :: `\w+ \+= (f?"|f?\x27)|\+= str\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -200,6 +212,12 @@ High
 Category
 
 Objects
+
+---
+
+### Grep
+
+`*.py` :: `re\.(match|search|sub|findall|split)\(|SentenceTransformer\(|joblib\.load\(|pickle\.load\(`
 
 ---
 
@@ -293,6 +311,12 @@ IO
 
 ---
 
+### Grep
+
+`*.py` :: `requests\.(get|post|put|delete|patch|request)\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -381,6 +405,12 @@ Memory
 
 ---
 
+### Grep
+
+`*.py` :: `\.readlines\(\)|\.read\(\)|read_csv\(|json\.load\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -465,6 +495,12 @@ Memory
 
 ---
 
+### Grep
+
+`*.py` :: `\b(any|all|sum|min|max|sorted|set|tuple)\(\[`
+
+---
+
 ### Что искать
 
 ```python
@@ -539,6 +575,12 @@ Medium
 Category
 
 Exceptions
+
+---
+
+### Grep
+
+`*.py` :: `except (KeyError|IndexError|AttributeError|ValueError|StopIteration)`
 
 ---
 
@@ -617,6 +659,12 @@ High
 Category
 
 Memory
+
+---
+
+### Grep
+
+`*.py` :: `lru_cache\(maxsize=None\)|@cache\b|^_?[A-Za-z_]*(CACHE|cache)\w* = (\{\}|dict\(\))`
 
 ---
 
@@ -718,6 +766,12 @@ Logging
 
 ---
 
+### Grep
+
+`*.py` :: `(log|logger|logging)\.\w+\(f["\x27]|(log|logger|logging)\.\w+\(.*\.format\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -795,6 +849,12 @@ Medium
 Category
 
 Concurrency
+
+---
+
+### Grep
+
+`*.py` :: `ThreadPoolExecutor|threading\.Thread\(`
 
 ---
 

@@ -20,6 +20,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(?i)(restTemplate|webClient|restClient|feignClient|httpClient)\w*\.(get|post|put|patch|delete|exchange|retrieve|execute|send)\w*\(|@FeignClient`
+
+---
+
 ### Что искать
 
 ```java
@@ -92,6 +98,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(?i)kafkaTemplate\w*\.send|KafkaProducer|\bproducer\.send\(`
+
+---
+
 Что искать
 
 ```java
@@ -133,6 +145,12 @@ ActiveMQ внутри транзакции
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `(?i)jmsTemplate\w*\.(send|convertAndSend)|JmsTemplate|ActiveMQ`
 
 ---
 
@@ -197,6 +215,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `@Scheduled`
+
+---
+
 Почему
 
 Огромная транзакция.
@@ -218,6 +242,12 @@ High
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `JobBuilderFactory|StepBuilderFactory|new (Job|Step)Builder\(|implements Tasklet|ItemWriter<|@EnableBatchProcessing`
 
 ---
 
@@ -244,6 +274,12 @@ REQUIRES_NEW внутри цикла
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `REQUIRES_NEW`
 
 ---
 
@@ -275,6 +311,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `REQUIRES_NEW`
+
+---
+
 Почему
 
 Каждая новая транзакция требует отдельного соединения.
@@ -290,6 +332,12 @@ High
 Severity
 
 High
+
+---
+
+### Grep
+
+`*Controller.{java,kt}` :: `@Transactional`
 
 ---
 
@@ -321,6 +369,12 @@ Info
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `@Transactional[^\n]*(\n\s*)?(private|protected)\s`
+
+---
+
 Почему
 
 Spring Proxy
@@ -338,6 +392,12 @@ Spring Proxy
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*Service*.{java,kt}` :: `\bthis\.[a-z]\w*\(`
 
 ---
 
@@ -364,6 +424,13 @@ readOnly отсутствует
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `@Transactional\b`
+Нет: `readOnly\s*=\s*true`
 
 ---
 
@@ -396,6 +463,12 @@ readOnly=true
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `readOnly\s*=\s*true`
 
 ---
 
@@ -487,6 +560,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(?i)(repository|repo|entityManager|em|session)\w*\.flush\(`
+
+---
+
 Исправление
 
 Использовать batching.
@@ -504,6 +583,12 @@ saveAndFlush()
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `saveAndFlush\(`
 
 ---
 
@@ -529,6 +614,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `TransactionTemplate|transactionTemplate\w*\.execute`
+
+---
+
 Почему
 
 Тысячи транзакций.
@@ -549,6 +640,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(entityManager|getEntityManager\(\)|\bem)\.flush\(`
+
+---
+
 # SPR-020
 
 ## Название
@@ -562,6 +659,12 @@ EntityManager.clear()
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `(entityManager|getEntityManager\(\)|\bem)\.clear\(`
 
 ---
 
@@ -582,6 +685,13 @@ Scheduler без блокировки кластера
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `@Scheduled`
+Нет: `SchedulerLock|ShedLock|LockProvider|lockAtMostFor|@Lock\b`
 
 ---
 
@@ -625,6 +735,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `@Async\b([^(\w\"]|$)`
+
+---
+
 Почему
 
 Используется
@@ -649,6 +765,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `new ThreadPoolTaskExecutor|SimpleAsyncTaskExecutor|newCachedThreadPool|setMaxPoolSize\(|setQueueCapacity\(`
+
+---
+
 Последствия
 
 Рост памяти
@@ -666,6 +788,13 @@ RestTemplate без Pooling
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `new RestTemplate\(|RestTemplateBuilder`
+Нет: `PoolingHttpClientConnectionManager|HttpComponentsClientHttpRequestFactory|HttpClientBuilder|OkHttp|PoolingHttp`
 
 ---
 
@@ -687,6 +816,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.block\(\)|\.blockFirst\(|\.blockLast\(`
+
+---
+
 Почему
 
 Блокирует поток.
@@ -704,6 +839,13 @@ High
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `new RestTemplate\(|RestTemplateBuilder|WebClient\.(create|builder)|HttpClient\.(newBuilder|newHttpClient)|HttpClients\.|@FeignClient`
+Нет: `(?i)timeout`
 
 ---
 
@@ -731,6 +873,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `@Retryable|RetryTemplate|@Backoff|Retry\.(of|decorate)\w*\(`
+
+---
+
 Почему
 
 Увеличивается время удержания блокировок.
@@ -746,6 +894,12 @@ Critical
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `Files\.(write|read|copy|newOutputStream|newInputStream|walk|lines)\w*\(|new File(Output|Input)Stream\(|new File(Writer|Reader)\(|\.transferTo\(`
 
 ---
 

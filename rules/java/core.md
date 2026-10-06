@@ -30,6 +30,12 @@ Database
 
 ---
 
+### Grep
+
+`*.java` :: `(?s)(for|while)\s*\([^\n]*\)\s*\{.{0,500}?([rR]epository\w*\.(find|save|exists|delete|count|get)\w*\(|[jJ]dbc\w*\.(update|query\w*|execute|batchUpdate)\(|[eE]ntityManager\.(find|persist|merge|createQuery)\()|\.(forEach|map)\([^\n]*[rR]epository\w*::`
+
+---
+
 ## Что искать
 
 ```
@@ -127,6 +133,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.java` :: `(?i)(resttemplate|webclient|feign\w*|restclient|httpclient)\w*\.(exchange|getFor\w+|postFor\w+|put|delete|get|post|retrieve|send)\(`
+
+---
+
 Что искать
 
 ```
@@ -188,6 +200,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.java` :: `(?i)(kafkatemplate|producer)\w*\.send\(`
+
+---
+
 Что искать
 
 ```
@@ -232,6 +250,12 @@ KAFKA-003
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.java` :: `\.findAll\(\s*\)|(?i:select\s+\*\s+from\s+[\w.]+\s*[\"';)])`
 
 ---
 
@@ -294,6 +318,12 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `\w*[lL]ist\w*\.contains\(`
+
+---
+
 Что искать
 
 ```
@@ -338,6 +368,12 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `\w*[lL]ist\w*\.remove\(|\.remove\(\s*0\s*\)`
+
+---
+
 Почему
 
 Каждое удаление
@@ -369,6 +405,12 @@ LinkedList
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.java` :: `(?m)^[ \t]*(for|while)\s*\([^\n]*\)\s*\{[ \t]*\n(?:[^\n]*\n){0,2}?[ \t]*(for|while)\s*\(`
 
 ---
 
@@ -416,6 +458,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `\.(stream|parallelStream)\(\)[^\n]*->[^\n]*\.(stream|parallelStream)\(\)|\.(flatMap|map|forEach|filter|anyMatch)\([^\n]*->[^\n]*\.stream\(\)`
+
+---
+
 Что искать
 
 ```
@@ -451,6 +499,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `\.parallelStream\(\)|\.parallel\(\)`
+
+---
+
 Почему
 
 Использует общий ForkJoinPool.
@@ -476,6 +530,12 @@ Thread.sleep()
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.java` :: `\b(Thread|TimeUnit\.\w+)\.sleep\(`
 
 ---
 
@@ -517,6 +577,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `new\s+(\w+\.)*ObjectMapper\(`
+
+---
+
 Что искать
 
 ```
@@ -545,6 +611,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `Pattern\.compile\(|\.(matches|replaceAll|replaceFirst)\(\s*\"`
+
+---
+
 Исправление
 
 Статический Pattern.
@@ -562,6 +634,12 @@ String concat в цикле
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `\w+\s*\+=\s*[^;]*\"`
 
 ---
 
@@ -593,6 +671,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `\bBigDecimal\b`
+
+---
+
 Почему
 
 Дорогие операции.
@@ -616,6 +700,12 @@ Reflection в горячем пути
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `Class\.forName\(|\.getDeclared(Method|Field|Constructor)s?\(|\.getMethods?\(\s*\"|\.newInstance\(|\bMethod\b[^\n]*\.invoke\(|BeanUtils\.\w+\(`
 
 ---
 
@@ -656,6 +746,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `\b(List|Set|Map|Queue|Deque|Stream|Collection)<(Integer|Long|Double|Float|Short|Byte|Character)\b|\b(Integer|Long|Double|Float)\s+\w+\s*=\s*\d+[LlDdFf]?\s*;`
+
+---
+
 Что искать
 
 Integer
@@ -679,6 +775,12 @@ Double
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `\.(collect\([^\n]*\)|toList\(\))\s*\.(stream|forEach)\(`
 
 ---
 
@@ -715,6 +817,12 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `\.(findAll|readAllLines|readAllBytes|fetchAll|selectAll)\(|Collectors\.toList\(\)`
+
+---
+
 Почему
 
 Рост памяти
@@ -745,6 +853,12 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `(?m)^\s*(private|protected|public|static)[^=(;]*\b(Map|HashMap|LinkedHashMap|ConcurrentHashMap|TreeMap)<[^=(;]*>\s+\w+\s*=\s*new\b`
+
+---
+
 Исправление
 
 Очистка
@@ -766,6 +880,12 @@ HashMap без initial capacity
 Severity
 
 Low
+
+---
+
+### Grep
+
+`*.java` :: `new\s+(Linked|Concurrent)?HashMap<[^>]*>\(\s*\)`
 
 ---
 

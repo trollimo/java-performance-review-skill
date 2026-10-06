@@ -28,6 +28,12 @@ Hibernate
 
 ---
 
+### Grep
+
+`*.kt` :: `@Entity|data class`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -114,6 +120,12 @@ Medium
 Category
 
 Spring
+
+---
+
+### Grep
+
+`*.kt` :: `plugin\.spring|plugin\.jpa|allOpen|noArg|@Entity|@Transactional`
 
 ---
 
@@ -204,6 +216,12 @@ Spring
 
 ---
 
+### Grep
+
+`*.kt` :: `@Transactional|suspend fun|withContext|async\s*\{`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -283,6 +301,12 @@ High
 Category
 
 Spring
+
+---
+
+### Grep
+
+`*.kt` :: `suspend fun|JpaRepository|CrudRepository|JdbcTemplate|RestTemplate`
 
 ---
 
@@ -368,6 +392,12 @@ Serialization
 
 ---
 
+### Grep
+
+`*.kt` :: `ObjectMapper\(\)|jacksonObjectMapper\(\)|registerKotlinModule`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -446,6 +476,12 @@ Medium
 Category
 
 Hibernate
+
+---
+
+### Grep
+
+`*.kt` :: `Stream<|\.asSequence\(\)|streamBy`
 
 ---
 
@@ -534,6 +570,12 @@ Medium
 Category
 
 Spring
+
+---
+
+### Grep
+
+`*.kt` :: `@Scheduled|@Async|runBlocking`
 
 ---
 

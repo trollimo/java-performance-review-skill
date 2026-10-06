@@ -24,6 +24,13 @@ Session
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(entityManager|\bem|session)\.(persist|merge)\(|[rR]epo(sitory)?\.(save|saveAll)\(`
+Нет: `\.clear\(\)`
+
+---
+
 ### Что искать
 
 ```java
@@ -96,6 +103,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.flush\(\)|\.(forEach|map|flatMap)\(.*\.flush\(\)`
+
+---
+
 Что искать
 
 ```java
@@ -138,6 +151,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `saveAndFlush\(`
+
+---
+
 Последствия
 
 Каждая запись становится отдельной операцией.
@@ -155,6 +174,12 @@ merge() вместо persist()
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\.merge\(`
 
 ---
 
@@ -186,6 +211,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.merge\(|\.(forEach|map|flatMap)\(.*\.merge\(`
+
+---
+
 Почему
 
 merge()
@@ -208,6 +239,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.save\(|\.(forEach|map|flatMap)\(.*\.save\(`
+
+---
+
 Исправление
 
 Batch Insert.
@@ -223,6 +260,12 @@ Dirty Checking большого Persistence Context
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `findAll\(\)\s*\.(stream|forEach)|getResultList\(\)\s*\.(stream|forEach)|:\s*\w*[rR]epo\w*\.findAll\(\)`
 
 ---
 
@@ -254,6 +297,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.set[A-Z]\w*\([^}]*\n[^}]*\.(save|saveAndFlush|persist|merge)\(`
+
+---
+
 Исправление
 
 hibernate.jdbc.batch_size
@@ -271,6 +320,13 @@ EntityManager.clear()
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `(entityManager|\bem|session)\.(persist|merge|saveOrUpdate)\(`
+Нет: `\.clear\(\)`
 
 ---
 
@@ -314,6 +370,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.(findById|getById|getReferenceById|findOne)\(|\.(forEach|map|flatMap)\(.*(\.|::)(findById|getById|getReferenceById)\b`
+
+---
+
 Что искать
 
 ```java
@@ -341,6 +403,12 @@ existsById()
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.existsById\(|\.(forEach|map|flatMap)\(.*(\.|::)existsById\b`
 
 ---
 
@@ -374,6 +442,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.deleteById\(|\.(forEach|map|flatMap)\(.*(\.|::)deleteById\b`
+
+---
+
 Исправление
 
 Bulk Delete.
@@ -391,6 +465,12 @@ save()
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\.set[A-Z]\w*\([^;]*\);\s*\n\s*\w+\.save\(\w+\);`
 
 ---
 
@@ -414,6 +494,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.flush\(\)`
+
+---
+
 # HIB-046
 
 ## Название
@@ -425,6 +511,12 @@ FlushMode.AUTO
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `setFlushMode\(|FlushMode(Type)?\.AUTO`
 
 ---
 
@@ -448,6 +540,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `PersistenceContextType\.EXTENDED|@Scope\(\s*\"(session|request)\"`
+
+---
+
 Почему
 
 Не предназначен для долгоживущего хранения данных.
@@ -466,6 +564,13 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.(findAll|getResultList|saveAll|deleteAll)\(`
+Нет: `Pageable|PageRequest|Slice|setMaxResults|\.clear\(\)|[cC]hunk|partition|ScrollableResults`
+
+---
+
 Исправление
 
 Разделить обработку на чанки.
@@ -481,6 +586,12 @@ Session удерживается слишком долго
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\.openSession\(\)|OpenEntityManagerInViewFilter|OpenSessionInViewFilter|PersistenceContextType\.EXTENDED`
 
 ---
 
@@ -503,6 +614,13 @@ High
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.(persist|save)\(`
+Нет: `StatelessSession`
 
 ---
 

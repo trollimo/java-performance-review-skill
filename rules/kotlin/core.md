@@ -28,6 +28,12 @@ Collections
 
 ---
 
+### Grep
+
+`*.kt` :: `\.(filter|map|flatMap|sortedBy)\s*\{`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -113,6 +119,12 @@ High
 Category
 
 Collections
+
+---
+
+### Grep
+
+`*.kt` :: `var \w+\s*(:\s*[\w<>, ?]+)?=\s*(listOf|setOf|mapOf|emptyList|emptyMap)`
 
 ---
 
@@ -205,6 +217,12 @@ Algorithms
 
 ---
 
+### Grep
+
+`*.kt` :: `\b!?in\s+\w*[lL]ist\w*|\.contains\(|\.indexOf\(`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -286,6 +304,12 @@ High
 Category
 
 Strings
+
+---
+
+### Grep
+
+`*.kt` :: `Regex\(|\.toRegex\(\)|String\.format\(|\.format\(`
 
 ---
 
@@ -373,6 +397,12 @@ Memory
 
 ---
 
+### Grep
+
+`*.kt` :: `(List|Set|Map)<(Int|Long|Double)|: (Int|Long|Double)\?`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -442,6 +472,12 @@ High
 Category
 
 Memory
+
+---
+
+### Grep
+
+`*.kt` :: `\(\*\w+|\*\w+\.toTypedArray\(\)`
 
 ---
 
@@ -516,6 +552,12 @@ Collections
 
 ---
 
+### Grep
+
+`*.kt` :: `\.filter\s*\{[^}]*\}\s*\.(size|first|firstOrNull|isNotEmpty|isEmpty|count)|\.map\s*\{[^}]*\}\s*\.sum\(\)`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -586,6 +628,12 @@ High
 Category
 
 Strings
+
+---
+
+### Grep
+
+`*.kt` :: `\+=\s*"|var \w+ = ""`
 
 ---
 

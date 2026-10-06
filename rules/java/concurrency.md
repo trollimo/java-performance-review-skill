@@ -20,6 +20,12 @@ Concurrency
 
 ---
 
+### Grep
+
+`*.java` :: `\bsynchronized\b`
+
+---
+
 Что искать
 
 ```java
@@ -76,6 +82,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.java` :: `synchronized\s*\(\s*[\w.]+\.class\s*\)|static\s+(final\s+)?synchronized|synchronized\s+static`
+
+---
+
 Что искать
 
 ```java
@@ -117,6 +129,12 @@ Very High
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.java` :: `(?s)\bsynchronized\b[^\n]*\{.{0,1000}?(jdbcTemplate|[jJ]dbc\w*|[rR]epository|[eE]ntityManager|\.query\w*\(|\.update\(|\.execute\w*\(|[rR]estTemplate|[wW]ebClient|[hH]ttp\w*Client|[kK]afka\w*|Files\.|\.sleep\(|\.send\(|Statement)`
 
 ---
 
@@ -166,6 +184,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.java` :: `(?s)\bsynchronized\b[^\n]*\{.{0,1000}?(?i:resttemplate|webclient|httpclient|restclient|feign\w*|HttpURLConnection|\.retrieve\(|\.exchange\()`
+
+---
+
 Почему
 
 Сетевой вызов блокирует все ожидающие потоки.
@@ -184,6 +208,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.java` :: `(?s)\bsynchronized\b[^\n]*\{.{0,1000}?([rR]epository|jdbcTemplate|[jJ]dbc\w*|[eE]ntityManager|\.query\w*\(|\.update\(|\.execute\w*\(|Statement|\.save\()`
+
+---
+
 Почему
 
 Длительная блокировка монитора во время SQL.
@@ -199,6 +229,12 @@ sleep() внутри synchronized
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.java` :: `(?s)\bsynchronized\b[^\n]*\{.{0,1000}?\.sleep\(`
 
 ---
 
@@ -227,6 +263,13 @@ Thread.sleep()
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.java` :: `(?s)==\s*null\s*\)\s*\{\s*synchronized\s*\(`
+Нет: `\bvolatile\b`
 
 ---
 
@@ -266,6 +309,13 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `static\s+[\w<>]+\s+getInstance\s*\(`
+Нет: `synchronized|\bvolatile\b|\benum\s+\w+|Holder|AtomicReference`
+
+---
+
 Что искать
 
 Lazy Singleton
@@ -283,6 +333,13 @@ ThreadLocal без очистки
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.java` :: `\bThreadLocal\b`
+Нет: `(?i)(local|holder|context|tl)\w*\.remove\(\)`
 
 ---
 
@@ -322,6 +379,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.java` :: `Executors\.new(FixedThreadPool|SingleThreadExecutor|SingleThreadScheduledExecutor)\(`
+
+---
+
 Почему
 
 LinkedBlockingQueue по умолчанию не ограничена.
@@ -356,6 +419,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.java` :: `new\s+(LinkedBlockingQueue|LinkedBlockingDeque)\s*(<[^>]*>)?\(\s*\)|new\s+(ConcurrentLinkedQueue|ConcurrentLinkedDeque|LinkedTransferQueue|PriorityBlockingQueue)\b|Executors\.new(FixedThreadPool|SingleThreadExecutor)\(`
+
+---
+
 Последствия
 
 OutOfMemoryError
@@ -377,6 +446,12 @@ OutOfMemoryError
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.java` :: `(?m)^\s*@Async\s*$|Executors\.newFixedThreadPool\(|static\s+(final\s+)?ExecutorService\b|@EnableAsync`
 
 ---
 
@@ -406,6 +481,12 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `CompletableFuture::join|(supplyAsync|runAsync|thenApply\w*|thenCompose)\([^\n]*\)\.join\(\)|\.map\([^\n]*\.join\(\)\)|[fF]uture\w*\.join\(\)`
+
+---
+
 Почему
 
 Фактически превращает параллельную обработку в последовательную.
@@ -430,6 +511,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `\b(supplyAsync|runAsync)\(`
+
+---
+
 Почему
 
 Используется общий ForkJoinPool.
@@ -450,6 +537,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `ForkJoinPool\.commonPool\(\)|\.parallelStream\(\)|\b(supplyAsync|runAsync)\(`
+
+---
+
 Почему
 
 Конкурирует со всеми остальными задачами JVM.
@@ -465,6 +558,12 @@ Busy Waiting
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.java` :: `while\s*\(\s*(true|!?[a-z]\w*(\.(get|isDone|isEmpty|isAlive|isCancelled|isLocked|isRunning)\(\))?)\s*\)|while\s*\([^\n)]*\)\s*(;|\{\s*\})`
 
 ---
 
@@ -502,6 +601,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `while\s*\([^\n]*(compareAndSet|getAndSet)\(|Thread\.(onSpinWait|yield)\(`
+
+---
+
 Почему
 
 При высокой конкуренции потребляет CPU.
@@ -517,6 +622,13 @@ CountDownLatch не освобождается
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.java` :: `\bCountDownLatch\b`
+Нет: `(?s)finally\s*\{[^}]*countDown\(`
 
 ---
 
@@ -537,6 +649,12 @@ Future.get()
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.java` :: `(?i)(future|\bfut|\btask|promise)\w*\.get\(\)|\.submit\([^\n]*\)\.get\(\)`
 
 ---
 
@@ -564,6 +682,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `\b(Reentrant)?ReadWriteLock\b|\bStampedLock\b`
+
+---
+
 Почему
 
 Накладные расходы превышают выигрыш.
@@ -579,6 +703,12 @@ AtomicLong под высокой конкуренцией
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `\bAtomic(Long|Integer)\b`
 
 ---
 
@@ -600,6 +730,12 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `(?m)^\s*(private|protected|public|static)[^=(;]*\b(Map|List|Set|HashMap|HashSet|ArrayList|LinkedHashMap|TreeMap)<[^=(;]*>\s+\w+\s*=\s*new\s+(HashMap|HashSet|ArrayList|LinkedHashMap|TreeMap|LinkedList)\b|\bstatic\s+(int|long|boolean|String|Date)\s+\w+\s*(=|;)`
+
+---
+
 Почему
 
 Рост количества блокировок.
@@ -615,6 +751,12 @@ High
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.java` :: `synchronized[^\n]*\{[ \t]*\n(?:[^\n]*\n){25}`
 
 ---
 
@@ -636,6 +778,13 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `Executors\.new\w+\(|new\s+(Scheduled)?ThreadPoolExecutor\(|new\s+ForkJoinPool\(`
+Нет: `shutdown|@PreDestroy|DisposableBean|destroyMethod`
+
+---
+
 Последствия
 
 Утечки потоков.
@@ -651,6 +800,12 @@ Medium
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `new\s+Thread\(|extends\s+Thread\b`
 
 ---
 
@@ -680,6 +835,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.java` :: `Executors\.newCachedThreadPool\(|new\s+SynchronousQueue|setMaxPoolSize\(\s*Integer\.MAX_VALUE|new\s+ThreadPoolExecutor\([^;]*MAX_VALUE`
+
+---
+
 Почему
 
 Количество потоков практически не ограничено.
@@ -703,6 +864,12 @@ ScheduledExecutor выполняет длительные задачи
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.java` :: `@Scheduled\b|\.schedule(AtFixedRate|WithFixedDelay)?\(|newScheduledThreadPool|newSingleThreadScheduledExecutor`
 
 ---
 
@@ -746,6 +913,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.java` :: `(?s)\b\w*[lL]ock\w*\.(lock|tryLock)\([^\n]*\)\s*;.{0,1000}?(jdbcTemplate|[jJ]dbc\w*|[rR]epository|[eE]ntityManager|\.query\w*\(|\.update\(|\.execute\w*\(|[rR]estTemplate|[wW]ebClient|[hH]ttp\w*Client|[kK]afka\w*|Files\.|\.sleep\(|\.send\(|Statement)`
+
+---
+
 Что искать
 
 Lock
@@ -771,6 +944,12 @@ Files
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `\b\w*[lL]ock\w*\.(lock|lockInterruptibly|tryLock)\(\)`
 
 ---
 

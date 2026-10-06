@@ -28,6 +28,12 @@ Coroutines
 
 ---
 
+### Grep
+
+`*.kt` :: `runBlocking`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -111,6 +117,12 @@ High
 Category
 
 Coroutines
+
+---
+
+### Grep
+
+`*.kt` :: `Dispatchers\.(Default|Main)|Thread\.sleep|JdbcTemplate|RestTemplate|File\(|Files\.`
 
 ---
 
@@ -204,6 +216,12 @@ Coroutines
 
 ---
 
+### Grep
+
+`*.kt` :: `GlobalScope|CoroutineScope\(`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -287,6 +305,12 @@ High
 Category
 
 Coroutines
+
+---
+
+### Grep
+
+`*.kt` :: `\.map\s*\{[^}]*(async|launch)|awaitAll\(|for \(.*\)\s*\{?\s*launch`
 
 ---
 
@@ -377,6 +401,12 @@ Coroutines
 
 ---
 
+### Grep
+
+`*.kt` :: `suspend fun`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -460,6 +490,12 @@ Coroutines
 
 ---
 
+### Grep
+
+`*.kt` :: `newCachedThreadPool|newFixedThreadPoolContext|asCoroutineDispatcher|Dispatchers\.IO|limitedParallelism`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -540,6 +576,12 @@ Coroutines
 
 ---
 
+### Grep
+
+`*.kt` :: `\.collect\s*\{|\.buffer\(|\.conflate\(|flow\s*\{`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -617,6 +659,12 @@ High
 Category
 
 Coroutines
+
+---
+
+### Grep
+
+`*.kt` :: `Channel\.UNLIMITED|Channel<[^>]*>\(\)|MutableSharedFlow|extraBufferCapacity|LinkedBlockingQueue`
 
 ---
 
@@ -703,6 +751,12 @@ Coroutines
 
 ---
 
+### Grep
+
+`*.kt` :: `synchronized\(|ReentrantLock|\.lock\(\)|Mutex\(`
+
+---
+
 ### Что искать
 
 ```kotlin
@@ -784,6 +838,12 @@ High
 Category
 
 Coroutines
+
+---
+
+### Grep
+
+`*.kt` :: `catch \(\w+: (Exception|Throwable)\)|runCatching`
 
 ---
 

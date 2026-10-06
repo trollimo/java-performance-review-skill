@@ -24,6 +24,12 @@ Streams
 
 ---
 
+### Grep
+
+`*.java` :: `\.(map|forEach|flatMap|filter|peek|mapToObj|anyMatch)\([^\n]*([rR]epository|[dD]ao|jdbcTemplate|[eE]ntityManager)\w*(::|\.)`
+
+---
+
 ### Что искать
 
 ```java
@@ -75,6 +81,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.java` :: `(?i)\.(map|foreach|flatmap|filter|peek)\([^\n]*(rest|webclient|feign|httpclient)\w*(::|\.)`
+
+---
+
 Что искать
 
 ```java
@@ -102,6 +114,12 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `(?i)\.(map|foreach|flatmap|filter|peek)\([^\n]*(kafka|producer)\w*(::|\.)`
+
+---
+
 Почему
 
 Появляется большое количество мелких операций.
@@ -117,6 +135,12 @@ High
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.java` :: `\.(stream|parallelStream)\(\)[^\n]*->[^\n]*\.(stream|parallelStream)\(\)|\.(flatMap|map|forEach|filter|anyMatch)\([^\n]*->[^\n]*\.stream\(\)`
 
 ---
 
@@ -154,6 +178,12 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `\.(filter|anyMatch|noneMatch|allMatch)\([^\n]*\.(contains|indexOf)\(`
+
+---
+
 Пример
 
 ```java
@@ -186,6 +216,12 @@ Low
 
 ---
 
+### Grep
+
+`*.java` :: `(?s)\.(sorted|collect|distinct)\([^;]{0,200}?\.(findFirst|findAny)\(`
+
+---
+
 Почему
 
 Возможно преждевременное выполнение тяжелых операций.
@@ -201,6 +237,12 @@ Low
 Severity
 
 Low
+
+---
+
+### Grep
+
+`*.java` :: `(?s)\.filter\([^;]{0,150}?\.filter\(`
 
 ---
 
@@ -224,6 +266,12 @@ Low
 
 ---
 
+### Grep
+
+`*.java` :: `(?s)\.map\([^;]{0,150}?\.map\(`
+
+---
+
 Проверить
 
 нет ли лишних преобразований.
@@ -241,6 +289,12 @@ collect(toList())
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `\.collect\(Collectors\.toList\(\)\)|\.toList\(\)`
 
 ---
 
@@ -264,6 +318,12 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `\.sorted\(`
+
+---
+
 Почему
 
 Полная сортировка O(n log n).
@@ -284,6 +344,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `\.distinct\(\)`
+
+---
+
 Почему
 
 Создается внутренний HashSet.
@@ -301,6 +367,12 @@ peek()
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `\.peek\(`
 
 ---
 
@@ -325,6 +397,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `\.parallelStream\(\)|\.parallel\(\)`
+
+---
+
 Почему
 
 Может ухудшить производительность.
@@ -342,6 +420,12 @@ parallelStream()
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.java` :: `(?is)(parallelstream\(\)|\.parallel\(\))[^;]{0,500}?(repository|\bdao|jdbc|entitymanager|\.query\()`
 
 ---
 
@@ -365,6 +449,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.java` :: `(?is)(parallelstream\(\)|\.parallel\(\))[^;]{0,500}?(resttemplate|webclient|feign|httpclient|restclient)`
+
+---
+
 Почему
 
 Может перегрузить внешний сервис.
@@ -385,6 +475,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `(?is)(parallelstream\(\)|\.parallel\(\))[^;]{0,500}?(kafka|producer)`
+
+---
+
 Проверить потокобезопасность
 и ожидаемый throughput.
 
@@ -399,6 +495,12 @@ Medium
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `\.(map|flatMap|mapToObj)\([^\n]*->[^\n]*\bnew\s+[A-Z]\w*[(<]`
 
 ---
 
@@ -417,6 +519,12 @@ Medium
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `\bStream<(Integer|Long|Double)>|\.boxed\(\)|\.reduce\(\s*0L?\s*,\s*(Integer|Long)::sum`
 
 ---
 
@@ -465,6 +573,12 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `(?s)\.sorted\([^;]{0,200}?\.sorted\(`
+
+---
+
 Что искать
 
 Одинаковый Stream
@@ -483,6 +597,12 @@ collect(groupingBy())
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `Collectors\.(groupingBy|groupingByConcurrent|partitioningBy)\(`
 
 ---
 
@@ -506,6 +626,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `\.flatMap\(`
+
+---
+
 # JAVA-STR-023
 
 ## Название
@@ -515,6 +641,12 @@ Stream используется вместо простого цикла
 Severity
 
 Low
+
+---
+
+### Grep
+
+`*.java` :: `\.stream\(\)\s*\.forEach\(|IntStream\.range(Closed)?\([^;]*\)\s*\.forEach\(`
 
 ---
 
@@ -535,6 +667,12 @@ Low
 Severity
 
 Low
+
+---
+
+### Grep
+
+`*.java` :: `(?m)(^[ \t]*\.\w+\([^\n]*\n){6}`
 
 ---
 

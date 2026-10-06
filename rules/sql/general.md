@@ -24,6 +24,12 @@ Projection
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bselect\s+(distinct\s+)?([\w"]+\.)?\*\s+from\b`
+
+---
+
 ### Что искать
 
 ```sql
@@ -87,6 +93,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?im)\bselect\s+\*\s+from\s+[\w."]+\s*(;|"|'|$)`
+
+---
+
 Что искать
 
 ```
@@ -115,6 +127,12 @@ FROM orders
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bselect\s+[^;"]{1,200}?\bfrom\s+[\w.]+\s*(;|"|')`
 
 ---
 
@@ -149,6 +167,12 @@ OFFSET Pagination
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\boffset\s+(\d{4,}|\?|:\w+|\$\d+|%s|#\{|\$\{)|\.offset\(|setFirstResult\(`
 
 ---
 
@@ -204,6 +228,12 @@ High
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bcount\s*\(\s*(\*|1)\s*\)\s*(as\s+\w+\s+)?from\s+[\w."]+\s*(;|"|')`
+
+---
+
 Почему
 
 Полное сканирование.
@@ -227,6 +257,12 @@ COUNT(*)
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bselect\s+count\s*\(\s*(\*|1)\s*\)|\.count\(\)\s*\.scalar\(|\.scalar\(\)\s*#?.*count`
 
 ---
 
@@ -254,6 +290,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bselect\s+distinct\b|\.distinct\(`
+
+---
+
 Почему
 
 Дополнительная сортировка
@@ -276,6 +318,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\border\s+by\b`
+
+---
+
 Почему
 
 Сортируется весь набор данных.
@@ -293,6 +341,12 @@ ORDER BY
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\border\s+by\s+(random|rand|lower|upper|coalesce|md5|cast)\s*\(`
 
 ---
 
@@ -318,6 +372,12 @@ High
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bgroup\s+by\b|\.group_by\(`
+
+---
+
 Исправление
 
 Предварительная агрегация
@@ -335,6 +395,12 @@ Materialized View.
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\b(not\s+)?exists\s*\(\s*select\b`
 
 ---
 
@@ -391,6 +457,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bin\s*\(\s*(\d+|'[^']*')\s*(,\s*(\d+|'[^']*')\s*){14,}\)|\bin\s*\(\s*(\?\s*,\s*){9,}|\bin\s*\(\s*["']\s*\+|\bin\s*\(\s*%s\s*\)`
+
+---
+
 Почему
 
 Очень длинный список
@@ -421,6 +493,12 @@ High
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bnot\s+in\s*\(\s*(select\b|:\w+|\?|%s|#\{|\$\{)|\.not_?in_\(`
+
+---
+
 Почему
 
 Может работать значительно хуже,
@@ -438,6 +516,12 @@ LIKE '%text'
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\blike\s+(concat\s*\(\s*)?(['"]%|'%'\s*\|\|)|\.i?like\(\s*f?["']%|\bfind\w*By\w*(Containing|EndingWith)\(`
 
 ---
 
@@ -485,6 +569,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bilike\b|\.ilike\(`
+
+---
+
 Почему
 
 Та же проблема,
@@ -502,6 +592,12 @@ Critical
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\b(where|and|or)\s+(lower|upper|date|cast|coalesce|substring|substr|trim|to_char|date_trunc|extract)\s*\(\s*[\w.]|\.(filter|where)\(\s*func\.(lower|upper|date|substr|trim|date_trunc|coalesce)\(`
 
 ---
 
@@ -547,6 +643,12 @@ High
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\b(where|and|or)\s+(cast\s*\(|[\w.]+::\w+)|\.cast\(`
+
+---
+
 Почему
 
 Может отключить использование индекса.
@@ -562,6 +664,12 @@ High
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\b\w*id\s*=\s*'\d+'`
 
 ---
 
@@ -591,6 +699,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?im)\bunion\s+(select\b|\(|distinct\b)|^\s*union\s*$|\.union\(`
+
+---
+
 Почему
 
 UNION удаляет дубликаты.
@@ -610,6 +724,12 @@ ORDER BY
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bselect\s+distinct\b[^\n]*\border\s+by\b|\.distinct\([^\n]*\.order_by\(|\.order_by\([^\n]*\.distinct\(`
 
 ---
 
@@ -651,6 +771,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?is)(\bjoin\b[^;]{0,300}?[\n]*){8}`
+
+---
+
 Что искать
 
 8+
@@ -683,6 +809,12 @@ Low
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bleft\s+(outer\s+)?join\b|\.outerjoin\(|isouter\s*=\s*True`
+
+---
+
 Исправление
 
 Использовать INNER JOIN.
@@ -698,6 +830,12 @@ SELECT в цикле приложения
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt,py}` :: `(?i)(\b(for|while)\b[^\n]*[{:][ \t]*\n([^\n]*\n){0,3}?|\b(forEach|map)\([^\n]*)[^\n]*\b(jdbcTemplate|jdbc|cursor|conn|connection|session|entityManager|em)\.(query\w*|execute\w*|get|find\w*|createQuery|createNativeQuery)\(`
 
 ---
 
@@ -739,6 +877,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt,py}` :: `(\b(for|while)\b[^\n]*[{:][ \t]*\n([^\n]*\n){0,3}?|\b(forEach|map)\([^\n]*)[^\n]*\.(update|execute|executeUpdate|saveAndFlush)\(`
+
+---
+
 Исправление
 
 Bulk UPDATE.
@@ -756,6 +900,12 @@ Bulk UPDATE.
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt,py}` :: `(\b(for|while)\b[^\n]*[{:][ \t]*\n([^\n]*\n){0,3}?|\b(forEach|map)\([^\n]*)[^\n]*\.(delete|deleteById|remove|executeUpdate)\(`
 
 ---
 
@@ -777,6 +927,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bin\s*\(\s*(:\w+|\?|%s|\$\{[^}]+\}|#\{[^}]+\})\s*\)|\.in_\(`
+
+---
+
 # SQL-028
 
 ## Название
@@ -788,6 +944,12 @@ Medium
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i),\s*\(\s*select\b|\bselect\s+\(\s*select\b`
 
 ---
 
@@ -824,6 +986,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bwith\s+(recursive\s+)?\w+\s+as\s*(\(|materialized|not\s+materialized)|\.cte\(`
+
+---
+
 Почему
 
 В некоторых СУБД
@@ -843,6 +1011,13 @@ Medium
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\b(like|ilike)\s+(\?|:\w+|'%|concat|\$)|\.i?like\(`
+Нет: `(?i)\blimit\b|Pageable|setMaxResults|\.limit\(|PageRequest|fetch\s+first|Slice|\.paginate\(|\.top\(`
 
 ---
 

@@ -26,6 +26,12 @@ Fetching
 
 ---
 
+### Grep
+
+`*.py` :: `\.objects\.(all|filter)\(|select_related|prefetch_related`
+
+---
+
 ### Что искать
 
 ```python
@@ -110,6 +116,12 @@ High
 Category
 
 Fetching
+
+---
+
+### Grep
+
+`*.py` :: `\.\w+_set\.(all|filter)\(|\.\w+\.all\(\)|prefetch_related`
 
 ---
 
@@ -204,6 +216,12 @@ Query
 
 ---
 
+### Grep
+
+`*.py` :: `len\(.*(objects|queryset|qs)|if .*\.objects\.(all|filter)\(|list\(.*\.objects\.`
+
+---
+
 ### Что искать
 
 ```python
@@ -286,6 +304,12 @@ Query
 
 ---
 
+### Grep
+
+`*.py` :: `\.objects\.(all|filter)\(|\.(only|defer|values|values_list)\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -359,6 +383,12 @@ High
 Category
 
 Memory
+
+---
+
+### Grep
+
+`*.py` :: `for \w+ in .*\.objects\.(all|filter)\(|\.iterator\(`
 
 ---
 
@@ -443,6 +473,12 @@ High
 Category
 
 Batch
+
+---
+
+### Grep
+
+`*.py` :: `\.save\(\)|\.objects\.create\(|bulk_create\(|bulk_update\(`
 
 ---
 
@@ -538,6 +574,12 @@ Query
 
 ---
 
+### Grep
+
+`*.py` :: `\.\w+ \+= \d|\.\w+ = \w+\.\w+ [+-] |\bF\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -620,6 +662,12 @@ Batch
 
 ---
 
+### Grep
+
+`*.py` :: `get_or_create\(|update_or_create\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -695,6 +743,12 @@ Medium
 Category
 
 Indexes
+
+---
+
+### Grep
+
+`*.py` :: `\.(filter|order_by|exclude)\(|db_index|indexes\s*=`
 
 ---
 
@@ -784,6 +838,12 @@ Pagination
 
 ---
 
+### Grep
+
+`*.py` :: `Paginator\(|\.count\(\)|\[\w*offset`
+
+---
+
 ### Что искать
 
 ```python
@@ -859,6 +919,12 @@ High
 Category
 
 Query
+
+---
+
+### Grep
+
+`*.py` :: `__in=`
 
 ---
 
@@ -942,6 +1008,12 @@ Medium
 Category
 
 Indexes
+
+---
+
+### Grep
+
+`*.py` :: `__i?contains=|SearchVector`
 
 ---
 

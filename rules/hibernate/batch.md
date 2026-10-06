@@ -24,6 +24,13 @@ Batching
 
 ---
 
+### Grep
+
+`*.{properties,yml,yaml,xml}` :: `spring\.jpa|^\s*jpa:|hibernate\.dialect|hibernate\.hbm2ddl|<persistence-unit|^\s*hibernate:`
+Нет: `batch_size`
+
+---
+
 ### Что искать
 
 Отсутствует
@@ -86,6 +93,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{properties,yml,yaml,xml}` :: `(?m)batch_size\s*[:=]\s*[1-5]\s*$`
+
+---
+
 Что искать
 
 ```
@@ -116,6 +129,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{properties,yml,yaml,xml}` :: `(?m)batch_size\s*[:=]\s*([5-9][0-9]{2}|[1-9][0-9]{3,})\s*$`
+
+---
+
 Почему
 
 Большие batch
@@ -137,6 +156,12 @@ saveAndFlush()
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `saveAndFlush\(`
 
 ---
 
@@ -170,6 +195,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.flush\(\)|\.(forEach|map|flatMap)\(.*\.flush\(\)`
+
+---
+
 Исправление
 
 Flush только после N записей.
@@ -185,6 +216,13 @@ order_inserts отключен
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{properties,yml,yaml,xml}` :: `batch_size`
+Нет: `order_inserts`
 
 ---
 
@@ -216,6 +254,13 @@ High
 
 ---
 
+### Grep
+
+`*.{properties,yml,yaml,xml}` :: `batch_size`
+Нет: `order_updates`
+
+---
+
 Почему
 
 Обновления не объединяются.
@@ -231,6 +276,13 @@ batch_versioned_data отключен
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{properties,yml,yaml,xml}` :: `batch_size`
+Нет: `batch_versioned_data`
 
 ---
 
@@ -251,6 +303,12 @@ IDENTITY отключает batching
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `strategy\s*=\s*(GenerationType\.)?IDENTITY`
 
 ---
 
@@ -292,6 +350,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `allocationSize\s*=\s*1\b`
+
+---
+
 Что искать
 
 ```java
@@ -330,6 +394,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `strategy\s*=\s*(GenerationType\.)?TABLE\b|@TableGenerator`
+
+---
+
 Почему
 
 Самый медленный способ генерации ID.
@@ -345,6 +415,12 @@ Batch Insert отсутствует
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.(save|persist)\(|\.(forEach|map|flatMap)\(.*\.(save|persist)\(`
 
 ---
 
@@ -382,6 +458,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.set[A-Z]\w*\([^}]*\n[^}]*\.(save|saveAndFlush|merge)\(`
+
+---
+
 Исправление
 
 Bulk Update.
@@ -397,6 +479,12 @@ Batch Delete отсутствует
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.(delete|remove)\(|\.(forEach|map|flatMap)\(.*(\.|::)(delete|remove)\b`
 
 ---
 
@@ -432,6 +520,13 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.persist\(|\.(forEach|map|flatMap)\(.*\.persist\(`
+Нет: `\.clear\(\)`
+
+---
+
 Последствия
 
 Рост Heap.
@@ -449,6 +544,12 @@ saveAll()
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\.saveAll\(`
 
 ---
 
@@ -522,6 +623,13 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.flush\(\)`
+Нет: `TransactionTemplate|REQUIRES_NEW|\.commit\(|PlatformTransactionManager`
+
+---
+
 Почему
 
 Rollback становится дорогим.
@@ -544,6 +652,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `cascade\s*=\s*(\{\s*)?(CascadeType\.)?(ALL|PERSIST)\b`
+
+---
+
 Почему
 
 Непредсказуемое количество SQL.
@@ -559,6 +673,13 @@ Batch Job без chunking
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `@Scheduled|CommandLineRunner|ApplicationRunner|Tasklet`
+Нет: `[cC]hunk|partition|Pageable|PageRequest|Slice|setMaxResults|\.clear\(\)|ScrollableResults`
 
 ---
 
@@ -582,6 +703,13 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `getResultStream\(|\.scroll\(|ScrollMode|Stream<\w+>\s+\w+\(`
+Нет: `setFetchSize|FETCH_SIZE|fetchSize|fetch_size`
+
+---
+
 Почему
 
 Драйвер загружает весь ResultSet.
@@ -597,6 +725,13 @@ Streaming отсутствует
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `for\s*\(.*:\s*.*(findAll|getResultList)\(\)`
+Нет: `getResultStream|ScrollableResults|\.scroll\(|Stream<`
 
 ---
 
@@ -626,6 +761,13 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.save\(|\.(forEach|map|flatMap)\(.*\.save\(`
+Нет: `saveAll`
+
+---
+
 # HIB-076
 
 ## Название
@@ -637,6 +779,13 @@ StatelessSession не используется
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `class\s+\w*(Import|Bulk|Migrat|Loader)\w*`
+Нет: `StatelessSession`
 
 ---
 
@@ -662,6 +811,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `for\s*\(.*:\s*.*(findAll|findBy\w*|getResultList|list)\(.*\)\s*\)\s*\{[^}]*\n[^}]*\.set[A-Z]\w*\(`
+
+---
+
 Исправление
 
 JPQL UPDATE
@@ -684,6 +839,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `for\s*\(.*:\s*.*(findAll|findBy\w*|getResultList|list)\(.*\)\s*\)\s*\{[^}]*\n[^}]*\.(delete|remove)\(|\.deleteAll\(`
+
+---
+
 Исправление
 
 Bulk DELETE.
@@ -699,6 +860,13 @@ Bulk DELETE.
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\.saveAll\(`
+Нет: `partition|subList|[cC]hunk|[bB]atchSize|BATCH_SIZE|Pageable`
 
 ---
 
@@ -721,6 +889,13 @@ Medium
 Severity
 
 Low
+
+---
+
+### Grep
+
+`*.{properties,yml,yaml,xml}` :: `batch_size`
+Нет: `generate_statistics|p6spy|datasource-proxy|show_sql|show-sql`
 
 ---
 

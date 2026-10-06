@@ -24,6 +24,12 @@ Architecture
 
 ---
 
+### Grep
+
+`*.{java,kt,py}` :: `(?i)(restTemplate|webClient|restClient|feignClient|httpClient)\w*\.(get|post|put|patch|delete|exchange|retrieve|execute|send)\w*\(|@FeignClient|\b(requests|httpx)\.(get|post|put|patch|delete|request)\(|httpx\.(Async)?Client\(|aiohttp\.ClientSession`
+
+---
+
 ### Что искать
 
 Service A
@@ -100,6 +106,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt,py}` :: `asyncio\.gather|CompletableFuture\.allOf|Flux\.merge|Mono\.zip|\.parallelStream\(|invokeAll\(`
+
+---
+
 ### Что искать
 
 Один REST запрос
@@ -129,6 +141,13 @@ Critical
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt,py}` :: `(?i)(restTemplate|webClient|restClient|feignClient|httpClient)\w*\.(get|post|put|patch|delete|exchange|retrieve|execute|send)\w*\(|@FeignClient|\b(requests|httpx)\.(get|post|put|patch|delete|request)\(|httpx\.(Async)?Client\(|aiohttp\.ClientSession`
+Нет: `(?i)circuit|resilience4j|hystrix|@Retry\b|tenacity|pybreaker|fallback`
 
 ---
 
@@ -199,6 +218,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `HttpSession|@SessionScope|@SessionAttributes|session\.setAttribute\(|@Scope\(\"session\"\)`
+
+---
+
 Почему
 
 Невозможно эффективно
@@ -215,6 +240,12 @@ Critical
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{yml,yaml,properties}` :: `jdbc:|DATABASE_URL|postgres(ql)?(\+\w+)?://|spring\.datasource\.url`
 
 ---
 
@@ -247,6 +278,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `@KafkaListener|kafkaTemplate\w*\.send|new NewTopic\(|TopicBuilder`
+
+---
+
 Почему
 
 Повышается связанность сервисов.
@@ -262,6 +299,12 @@ Medium
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `RedisTemplate|spring\.(data\.)?redis|REDIS_URL|redis://|@EnableCaching`
 
 ---
 
@@ -281,6 +324,12 @@ Shared Mutable State
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\bsynchronized\b|static\s+(final\s+)?(Concurrent|Hash|Linked|Array)?(Map|List|Set|Queue)<`
 
 ---
 
@@ -332,6 +381,13 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(?i)(kafkaTemplate|rabbitTemplate|jmsTemplate)\w*\.(send|convertAndSend)`
+Нет: `(?i)outbox`
+
+---
+
 Что искать
 
 DB Commit
@@ -361,6 +417,13 @@ KAFKA-016
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt,py}` :: `@(Post|Put)Mapping|@KafkaListener|@RabbitListener|@(app|router)\.(post|put)\(`
+Нет: `(?i)idempoten|dedup`
 
 ---
 
@@ -422,6 +485,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for\s*\(|forEach\(|\.map\()[^\n]*([Cc]lient|restTemplate|feign\w*)\.\w+\(`
+
+---
+
 Что искать
 
 Множество небольших REST вызовов
@@ -461,6 +530,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt,py}` :: `Thread\.sleep|TimeUnit\.[A-Z]+\.sleep|\btime\.sleep\(`
+
+---
+
 Проверить
 
 можно ли заменить
@@ -497,6 +572,13 @@ Critical
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt,py}` :: `(?i)(restTemplate|webClient|restClient|feignClient|httpClient)\w*\.(get|post|put|patch|delete|exchange|retrieve|execute|send)\w*\(|@FeignClient|\b(requests|httpx)\.(get|post|put|patch|delete|request)\(|httpx\.(Async)?Client\(|aiohttp\.ClientSession`
+Нет: `fallbackMethod|fallback\s*=|onErrorResume|onErrorReturn|@Recover|\bfallback\b`
 
 ---
 

@@ -24,6 +24,12 @@ Producer
 
 ---
 
+### Grep
+
+`*.{java,kt,py}` :: `\b([kK]afka\w*|[pP]roducer|template)\.send\(|new KafkaProducer|\.produce\(`
+
+---
+
 ### Что искать
 
 Producer отправляет сообщения по одному.
@@ -69,6 +75,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `linger[._]ms\W{0,6}0\b|LINGER_MS_CONFIG\W{1,4}0\b`
+
+---
+
 Почему
 
 Producer почти не формирует batch.
@@ -97,6 +109,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `producer\.batch-size|\bbatch\.size|BATCH_SIZE_CONFIG`
+
+---
+
 Почему
 
 Пакеты получаются маленькими.
@@ -114,6 +132,13 @@ compression.type отсутствует
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `ProducerConfig\.\w+|new KafkaProducer|DefaultKafkaProducerFactory|spring\.kafka\.producer|\bproducer:`
+Нет: `compression[._-](type|codec)|COMPRESSION_TYPE_CONFIG`
 
 ---
 
@@ -153,6 +178,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `compression[._-]type\W{0,6}gzip|COMPRESSION_TYPE_CONFIG\W{1,4}gzip|CompressionType\.GZIP`
+
+---
+
 Почему
 
 Высокая нагрузка CPU.
@@ -168,6 +199,12 @@ acks=all без необходимости
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `\backs\W{0,6}(all|-1)\b|ACKS_CONFIG\W{1,4}(all|-1)\b`
 
 ---
 
@@ -195,6 +232,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `\backs\W{0,6}0\b|ACKS_CONFIG\W{1,4}0\b`
+
+---
+
 Почему
 
 Высокий риск потери сообщений.
@@ -210,6 +253,12 @@ Idempotence отключен
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `enable[._-]idempotence\W{0,6}false|ENABLE_IDEMPOTENCE_CONFIG\W{1,4}false`
 
 ---
 
@@ -241,6 +290,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `max[._-]in[._-]flight[._-]requests[._-]per[._-]connection\W{0,6}([2-9]|\d\d)\b|MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION\W{1,4}([2-9]|\d\d)\b`
+
+---
+
 Почему
 
 Возможна потеря порядка сообщений.
@@ -256,6 +311,12 @@ Producer создается часто
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt,py}` :: `new KafkaProducer|KafkaProducer<[^>]*>\(|\bKafkaProducer\(|\bProducer\(\{|AIOKafkaProducer\(|new KafkaTemplate|new DefaultKafkaProducerFactory`
 
 ---
 
@@ -297,6 +358,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt,py}` :: `([pP]roducer|[kK]afka\w*|template)\.flush\(`
+
+---
+
 Почему
 
 Полностью отключает batching.
@@ -312,6 +379,12 @@ send().get()
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt,py}` :: `\.send\(.*\)\.(get|join|await)\(`
 
 ---
 
@@ -341,6 +414,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `max[._-]request[._-]size|MAX_REQUEST_SIZE_CONFIG|message[._-]max[._-]bytes|max[._-]message[._-]bytes|max[._-]partition[._-]fetch[._-]bytes|fetch[._-]max[._-]bytes|replica[._-]fetch[._-]max[._-]bytes`
+
+---
+
 Что проверить
 
 Размер сообщений
@@ -360,6 +439,12 @@ JSON сериализация большого объекта
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `(value[._-]serializer|VALUE_SERIALIZER_CLASS_CONFIG)\W.*Json|kafka\.support\.serializer\.JsonSerializer|(send|ProducerRecord<[^>]*>)\(.*(writeValueAsString|writeValueAsBytes|toJson|json\.dumps)\(`
 
 ---
 
@@ -390,6 +475,12 @@ Producer используется внутри транзакции БД
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `@Transactional(?:.|\n){0,3000}?([kK]afka\w*|[pP]roducer)\.send\(`
 
 ---
 
@@ -425,6 +516,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `\bretries\W{0,6}(\d{2,}|Integer\.MAX_VALUE)|RETRIES_CONFIG|retry[._-]backoff(\.max)?[._-]ms\W{0,6}0\b|RETRY_BACKOFF_MS_CONFIG\W{1,4}0\b`
+
+---
+
 Что искать
 
 Большое число retries
@@ -453,6 +550,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `delivery[._-]timeout[._-]ms|DELIVERY_TIMEOUT_MS_CONFIG`
+
+---
+
 Почему
 
 Ошибки обнаруживаются слишком поздно.
@@ -468,6 +571,12 @@ Producer публикует синхронно несколько топиков
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `([kK]afka\w*|[pP]roducer)\.send\([^;]*;(?:.|\n){0,400}?([kK]afka\w*|[pP]roducer)\.send\(`
 
 ---
 

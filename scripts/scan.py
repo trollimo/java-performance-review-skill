@@ -1,0 +1,193 @@
+#!/usr/bin/env python3
+"""Выполняет grep-подсказки всех правил по репозиторию и печатает только сработавшие.
+
+    python3 scripts/scan.py REPO [--min-sev High] [--tech python,nginx] [--max-loc 3] [--all] [--tests]
+
+Каталоги правил выполняются только для технологий, признаки которых найдены в репозитории
+(манифесты зависимостей, имена файлов); `--all` отключает этот фильтр, `--tests` включает тестовые каталоги и файлы (по умолчанию они пропускаются), `--tech` задаёт список вручную.
+
+Вывод компактный: severity, ID, название, где читать блок правила, число файлов, первые места.
+Правила без подсказки печатаются отдельным списком только для технологий, в которых что-то сработало.
+Не требует ripgrep; regex совместимы с ripgrep, но выполняются Python re по всему тексту файла.
+"""
+import fnmatch
+import os
+import re
+import signal
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from build_index import RULES, SEV_ORDER, parse  # noqa: E402
+from check_grep import HINT, SKIP_DIRS, FORBIDDEN, NOISY_FILES, expand  # noqa: E402
+
+MAX_BYTES = 1_000_000
+RULE_TIMEOUT = 2.0
+
+
+class Slow(Exception):
+    pass
+
+
+def _alarm(*_):
+    raise Slow()
+
+
+def arg(name, default=None):
+    if name in sys.argv:
+        return sys.argv[sys.argv.index(name) + 1]
+    return default
+
+
+MANIFEST_NAMES = ("pom.xml", "build.gradle", "build.gradle.kts", "pyproject.toml", "pipfile", "package.json",
+                  "setup.py", "setup.cfg", "dockerfile", "chart.yaml")
+ALWAYS = {"general", "architecture", "scalability"}
+
+
+def detect(repo, files):
+    """Множество каталогов правил, признаки которых есть в репозитории."""
+    names = [p.name.lower() for p in files]
+    rels = [str(p.relative_to(repo)).replace(os.sep, "/").lower() for p in files]
+    ext = lambda e: any(n.endswith(e) for n in names)
+    text = []
+    k_yaml = 0
+    for p, n, rel in zip(files, names, rels):
+        is_manifest = n in MANIFEST_NAMES or (n.startswith("requirements") and n.endswith(".txt")) or n.startswith("dockerfile") \
+            or "compose" in n and n.endswith((".yml", ".yaml")) or n.startswith(".env") or (n.startswith("application") and n.endswith((".yml", ".yaml", ".properties")))
+        sniff_k8s = n.endswith((".yml", ".yaml")) and k_yaml < 400
+        if not (is_manifest or sniff_k8s) or p.stat().st_size > 300_000:
+            continue
+        t = p.read_text(encoding="utf-8", errors="ignore").lower()
+        if is_manifest:
+            text.append(t)
+        if sniff_k8s:
+            k_yaml += 1
+            if re.search(r"kind:\s*(deployment|statefulset|daemonset|cronjob)\b", t):
+                text.append("kind-workload")
+    m = "\n".join(text)
+    has = lambda rx: re.search(rx, m) is not None
+    found = set(ALWAYS)
+    java, kotlin, py = ext(".java"), ext(".kt"), ext(".py")
+    if java: found.add("java")
+    if kotlin: found.add("kotlin")
+    if py: found.add("python")
+    if java or kotlin or py: found.add("logging")
+    if java or kotlin: found |= {"jvm", "gc"}
+    if "manage.py" in names or has(r"\bdjango\b"): found.add("django")
+    if has(r"spring"): found.add("spring")
+    if has(r"hibernate|data-jpa|jakarta\.persistence|javax\.persistence"): found.add("hibernate")
+    if has(r"jooq"): found.add("jooq")
+    if has(r"jdbc|hikari|dbcp|sqlalchemy|asyncpg|psycopg"): found.add("jdbc")
+    if has(r"kafka"): found.add("kafka")
+    if has(r"activemq|artemis"): found.add("activemq")
+    if has(r"liquibase") or any("db/changelog" in r for r in rels): found.add("liquibase")
+    if has(r"postgres|psycopg|asyncpg|pgjdbc"): found.add("postgres")
+    if has(r"sybase|jconn|jtds"): found.add("sybase")
+    if has(r"redis|lettuce|jedis|valkey"): found.add("redis")
+    if any(n.startswith("nginx") and n.endswith(".conf") for n in names) or has(r"nginx|ingress-nginx"): found.add("nginx")
+    if any(n.startswith("dockerfile") or "compose" in n and n.endswith((".yml", ".yaml")) for n in names): found.add("docker")
+    if "chart.yaml" in names: found.add("helm")
+    if "kind-workload" in m: found.add("kubernetes")
+    if any(re.search(r"(^|/)(alembic|migrations?)/|db/migration", r) for r in rels) or has(r"alembic|flyway"): found.add("migrations")
+    if ext(".sql") or found & {"postgres", "jdbc", "hibernate", "jooq", "django", "sybase"} or has(r"mysql|sqlite|sqlalchemy"):
+        found.add("sql")
+    if has(r"spring|fastapi|flask|django|express|starlette|aiohttp|quart|sanic|ktor|micronaut"): found.add("rest")
+    if has(r"springdoc|swagger|openapi|fastapi") or any(n.startswith(("openapi", "swagger")) for n in names): found.add("openapi")
+    if has(r"websocket"): found.add("websocket")
+    if has(r"micrometer|prometheus|opentelemetry|otel|actuator"): found.add("observability")
+    return found
+
+
+TEST_PATH = re.compile(r"(^|/)(tests?|__tests__|testing|e2e|fixtures)/|(^|/)test_[^/]*\.py$|_test\.(py|go)$|(Test|Tests|IT|ITCase)\.(java|kt)$|\.(test|spec)\.(js|ts)$")
+
+
+def collect():
+    rules = []
+    for d in sorted(p for p in RULES.iterdir() if p.is_dir()):
+        for f in sorted(d.glob("*.md")):
+            if f.name == "INDEX.md":
+                continue
+            for r in parse(f):
+                r["tech"] = d.name
+                r["path"] = f"rules/{d.name}/{f.name}"
+                rules.append(r)
+    return rules
+
+
+def main():
+    repo_arg = next((a for a in sys.argv[1:] if not a.startswith("--") and Path(a).is_dir()), None)
+    if not repo_arg:
+        sys.exit(__doc__)
+    repo = Path(repo_arg).resolve()
+    min_sev = SEV_ORDER.get(arg("--min-sev", "Info"), 4)
+    techs = set(arg("--tech", "").split(",")) - {""}
+    max_loc = int(arg("--max-loc", "3"))
+
+    files = [p for p in repo.rglob("*") if p.is_file() and not (set(p.relative_to(repo).parts) & SKIP_DIRS)]
+    if "--tests" not in sys.argv:
+        files = [p for p in files if not TEST_PATH.search(str(p.relative_to(repo)).replace(os.sep, "/"))]
+    all_rules = collect()
+    present = {r["tech"] for r in all_rules} if "--all" in sys.argv else detect(repo, files)
+    allowed = techs or present
+    skipped_techs = sorted({r["tech"] for r in all_rules} - allowed)
+    rules = [r for r in all_rules if r["tech"] in allowed and SEV_ORDER.get(r["sev"], 9) <= min_sev]
+    compiled = []
+    for r in rules:
+        m = HINT.match(r["grep"]) if r["grep"] else None
+        if not m or FORBIDDEN.search(m.group(2)):
+            continue
+        try:
+            compiled.append((r, expand(m.group(1)), re.compile(m.group(2)), re.compile(r["neg"]) if r["neg"] else None))
+        except re.error:
+            continue
+
+    hits = {r["id"]: [] for r, *_ in compiled}
+    skipped = set()
+    signal.signal(signal.SIGALRM, _alarm)
+    for p in files:
+        if p.stat().st_size > MAX_BYTES:
+            continue
+        cands = [c for c in compiled if any(fnmatch.fnmatch(p.name, g) for g in c[1])]
+        if not cands:
+            continue
+        text = p.read_text(encoding="utf-8", errors="ignore")
+        rel = str(p.relative_to(repo))
+        for r, _, rx, neg in cands:
+            if r["id"] in skipped:
+                continue
+            signal.setitimer(signal.ITIMER_REAL, RULE_TIMEOUT)
+            try:
+                if neg and neg.search(text):
+                    continue
+                m = rx.search(text)
+            except Slow:
+                skipped.add(r["id"])
+                print(f"# ПРЕДУПРЕЖДЕНИЕ: подсказка {r['id']} слишком медленная, пропущена", file=sys.stderr)
+                continue
+            finally:
+                signal.setitimer(signal.ITIMER_REAL, 0)
+            if m:
+                hits[r["id"]].append((rel, text.count("\n", 0, m.start()) + 1))
+
+    fired = [(r, hits[r["id"]]) for r, *_ in compiled if hits[r["id"]]]
+    fired.sort(key=lambda x: (SEV_ORDER.get(x[0]["sev"], 9), -len(x[1]), x[0]["id"]))
+    print(f"# Сработало правил: {len(fired)} из {len(compiled)} с подсказкой; файлов в репозитории: {len(files)}")
+    print(f"# Технологии: {', '.join(sorted(allowed))}" + (f"; пропущены без признаков: {', '.join(skipped_techs)}" if skipped_techs and not techs else ""))
+    print("# Совпадение = кандидат. Читать блок правила: Read <путь> offset=<start> limit=<end-start+1>\n")
+    for r, hs in fired:
+        noisy = "  [шумно: много файлов, проверять выборочно]" if len(hs) > NOISY_FILES else ""
+        locs = ", ".join(f"{f}:{ln}" for f, ln in hs[:max_loc])
+        more = f" (+{len(hs) - max_loc})" if len(hs) > max_loc else ""
+        print(f"[{r['sev']}] {r['id']} {r['title']} — {r['path']}:{r['start']}-{r['end']}")
+        print(f"    файлов {len(hs)}: {locs}{more}{noisy}")
+
+    active = {r["tech"] for r, _ in fired}
+    manual = [r for r in rules if r["tech"] in active and not (r["grep"] and HINT.match(r["grep"]))]
+    if manual:
+        print("\n# Правила без grep-подсказки (применять по названию, если код встретился):")
+        for r in sorted(manual, key=lambda r: (SEV_ORDER.get(r["sev"], 9), r["id"])):
+            print(f"[{r['sev']}] {r['id']} {r['title']} — {r['path']}:{r['start']}-{r['end']}")
+
+
+if __name__ == "__main__":
+    main()

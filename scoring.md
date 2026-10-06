@@ -1,6 +1,10 @@
 # Performance Scoring Model
 
-Version: 1.0
+Version: 1.1
+
+> Версия 1.1. Итоговый Score = сумма баллов находок: вес Severity × коэффициент Confidence + эскалация.
+> Таблицы Database, Architecture, Scalability, JVM и Kubernetes ниже НЕ добавляются к сумме: они задают разрез тех же баллов по областям
+> (раньше одна проблема считалась дважды). Расчёт реализован в `scripts/render_report.py`; этот файл читается только в Manual mode.
 
 ---
 
@@ -19,25 +23,9 @@ Version: 1.0
 
 # Общая формула
 
-Performance Risk Score =
+Performance Risk Score = Σ по находкам ( вес Severity × коэффициент Confidence + Escalation )
 
-Severity Score
-
-+
-
-Architecture Score
-
-+
-
-Scalability Score
-
-+
-
-Database Score
-
-+
-
-Confidence Modifier
+Architecture, Scalability, Database, JVM и Kubernetes Score — разрез этой суммы по областям, а не слагаемые.
 
 ---
 
@@ -122,7 +110,7 @@ Batch Job
 
 # Database Score
 
-Дополнительные баллы.
+Разрез по области (в сумму не добавляется); ориентир при выборе Severity и Escalation.
 
 | Ситуация | Score |
 |-----------|-------:|
@@ -158,7 +146,7 @@ Batch Job
 
 # Scalability Score
 
-Добавляется отдельно.
+Разрез по области (в сумму не добавляется).
 
 | Ограничение | Score |
 |-------------|-------:|

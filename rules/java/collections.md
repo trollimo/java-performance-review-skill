@@ -24,6 +24,12 @@ Collections
 
 ---
 
+### Grep
+
+`*.java` :: `\w*[lL]ist\w*\.contains\(|\.stream\(\)[^\n]*\.contains\(`
+
+---
+
 ### Что искать
 
 ```java
@@ -78,6 +84,12 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `\w*[lL]ist\w*\.remove\(|\.remove\(\s*0\s*\)`
+
+---
+
 Почему
 
 Все элементы после удаляемого
@@ -107,6 +119,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.java` :: `\w*[lL]ist\w*\.(indexOf|lastIndexOf)\(|Arrays\.asList\([^)]*\)\.indexOf\(`
+
+---
+
 Почему
 
 Каждый вызов выполняет линейный поиск.
@@ -122,6 +140,12 @@ Critical
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.java` :: `(?m)^[ \t]*(for|while)\s*\([^\n]*\)\s*\{[ \t]*\n(?:[^\n]*\n){0,2}?[ \t]*(for|while)\s*\(`
 
 ---
 
@@ -163,6 +187,12 @@ High
 
 ---
 
+### Grep
+
+`*.java` :: `(?s)\.(filter|anyMatch)\([^;]{0,120}?(equals|==)[^;]{0,120}?\)\s*\.(findFirst|findAny|orElse\w*)\(|\.anyMatch\([^;\n]*(equals|==)`
+
+---
+
 Исправление
 
 Предварительно построить Map.
@@ -178,6 +208,12 @@ HashMap создается в каждой итерации
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `(?s)(for|while)\s*\([^\n]*\)\s*\{.{0,400}?new\s+(Hash|LinkedHash|Tree|Concurrent)?(Hash)?Map\s*[<(]`
 
 ---
 
@@ -199,6 +235,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `Collectors\.(toMap|groupingBy)\(`
+
+---
+
 Почему
 
 Можно построить один раз.
@@ -214,6 +256,12 @@ ArrayList без начальной емкости
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `new\s+ArrayList<[^>]*>\(\s*\)`
 
 ---
 
@@ -247,6 +295,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `new\s+(Linked)?HashMap<[^>]*>\(\s*\)`
+
+---
+
 Почему
 
 Многократный resize.
@@ -265,6 +319,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `new\s+(Linked)?HashSet<[^>]*>\(\s*\)`
+
+---
+
 # JAVA-COL-011
 
 ## Название
@@ -274,6 +334,12 @@ LinkedList используется как List
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `\bLinkedList\s*<|new\s+LinkedList\b`
 
 ---
 
@@ -295,6 +361,12 @@ Low
 
 ---
 
+### Grep
+
+`*.java` :: `\b(Vector|Hashtable|Stack)\s*<|new\s+(Vector|Hashtable|Stack)\s*[(<]`
+
+---
+
 Почему
 
 Лишняя синхронизация.
@@ -310,6 +382,12 @@ CopyOnWriteArrayList для частой записи
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.java` :: `\bCopyOnWrite(ArrayList|ArraySet)\b`
 
 ---
 
@@ -331,6 +409,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `Collections\.synchronized(List|Map|Set|Collection|SortedMap|SortedSet)\(`
+
+---
+
 Проверить
 
 не станет ли коллекция
@@ -347,6 +431,12 @@ ConcurrentHashMap не используется
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `(?m)^\s*(private|protected|public|static)[^=(;]*\b(Map|List|Set|HashMap|HashSet|ArrayList|LinkedHashMap|TreeMap)<[^=(;]*>\s+\w+\s*=\s*new\s+(HashMap|HashSet|ArrayList|LinkedHashMap|TreeMap|LinkedList)\b`
 
 ---
 
@@ -370,6 +460,12 @@ containsKey()
 Severity
 
 Low
+
+---
+
+### Grep
+
+`*.java` :: `\.containsKey\(`
 
 ---
 
@@ -411,6 +507,12 @@ Low
 
 ---
 
+### Grep
+
+`*.java` :: `if\s*\(\s*\w+\.get\([^)]*\)\s*==\s*null\s*\)|!\w+\.containsKey\(`
+
+---
+
 # JAVA-COL-018
 
 ## Название
@@ -422,6 +524,12 @@ toArray()
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `\.toArray\(`
 
 ---
 
@@ -440,6 +548,12 @@ Medium
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `(?s)(for|while)\s*\([^\n]*\)\s*\{.{0,400}?new\s+(ArrayList|HashMap|HashSet|LinkedList|LinkedHashMap|TreeMap|TreeSet)\b`
 
 ---
 
@@ -467,6 +581,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `\w*[lL]ist\w*\.contains\(`
+
+---
+
 Исправление
 
 HashSet.
@@ -482,6 +602,12 @@ HashSet.
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.java` :: `(?s)(for|while)\s*\([^\n]*\)\s*\{.{0,400}?(Collections\.sort\(|\.sort\(|\.sorted\()`
 
 ---
 
@@ -506,6 +632,12 @@ Low
 
 ---
 
+### Grep
+
+`*.java` :: `\.distinct\(\)`
+
+---
+
 # JAVA-COL-023
 
 ## Название
@@ -520,6 +652,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.java` :: `(?s)(for|while)\s*\([^\n]*\)\s*\{.{0,400}?(\.addAll\(|\.putAll\(|Stream\.concat\()`
+
+---
+
 # JAVA-COL-024
 
 ## Название
@@ -529,6 +667,12 @@ Medium
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.java` :: `(?m)^\s*(private|protected|public)?\s*static\s+(final\s+)?[\w.]*(Map|List|Set|Queue|Deque|Collection)<`
 
 ---
 

@@ -26,6 +26,12 @@ DRF
 
 ---
 
+### Grep
+
+`*.py` :: `class \w+Serializer|SerializerMethodField|source=["\x27][^"\x27]*\.`
+
+---
+
 ### Что искать
 
 ```python
@@ -116,6 +122,12 @@ DRF
 
 ---
 
+### Grep
+
+`*.py` :: `ListAPIView|ModelViewSet|pagination_class|DEFAULT_PAGINATION_CLASS|PAGE_SIZE`
+
+---
+
 ### Что искать
 
 ```python
@@ -200,6 +212,12 @@ High
 Category
 
 Transactions
+
+---
+
+### Grep
+
+`*.py` :: `transaction\.atomic|ATOMIC_REQUESTS|requests\.\w+\(|httpx\.\w+\(|send_mail\(|\.delay\(`
 
 ---
 
@@ -288,6 +306,12 @@ IO
 
 ---
 
+### Grep
+
+`*.py` :: `requests\.\w+\(|urllib\.request|httpx\.(get|post)\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -362,6 +386,12 @@ High
 Category
 
 Celery
+
+---
+
+### Grep
+
+`*.py` :: `\.delay\(|\.apply_async\(|on_commit`
 
 ---
 
@@ -445,6 +475,12 @@ Celery
 
 ---
 
+### Grep
+
+`*.py` :: `\.delay\(|\.apply_async\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -518,6 +554,12 @@ High
 Category
 
 Celery
+
+---
+
+### Grep
+
+`*.py` :: `\.delay\(.*(queryset|objects|dumps)|CELERY_RESULT_BACKEND|ignore_result|result_expires`
 
 ---
 
@@ -605,6 +647,12 @@ Celery
 
 ---
 
+### Grep
+
+`*.py` :: `@(shared_task|app\.task)|time_limit|task_routes|acks_late|CELERY_`
+
+---
+
 ### Что искать
 
 ```python
@@ -681,6 +729,12 @@ Medium
 Category
 
 Configuration
+
+---
+
+### Grep
+
+`*.py` :: `CONN_MAX_AGE|CONN_HEALTH_CHECKS|DATABASES\s*=`
 
 ---
 
@@ -765,6 +819,12 @@ Cache
 
 ---
 
+### Grep
+
+`*.py` :: `CACHES\s*=|LocMemCache|DummyCache|cache_page|cache\.(get|set)\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -846,6 +906,12 @@ Configuration
 
 ---
 
+### Grep
+
+`*.py` :: `DEBUG\s*=\s*(True|os|env|config)`
+
+---
+
 ### Что искать
 
 ```python
@@ -917,6 +983,12 @@ Medium
 Category
 
 Framework
+
+---
+
+### Grep
+
+`*.py` :: `@receiver|post_save|pre_save|MIDDLEWARE\s*=|class \w+Middleware`
 
 ---
 
@@ -997,6 +1069,12 @@ Medium
 Category
 
 Async
+
+---
+
+### Grep
+
+`*.py` :: `async def \w+\(.*request|sync_to_async`
 
 ---
 

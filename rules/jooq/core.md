@@ -24,6 +24,13 @@ Memory
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.fetch\(\)`
+Нет: `fetchLazy|fetchStream`
+
+---
+
 ### Что искать
 
 ```java
@@ -83,6 +90,13 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.fetch\(\)`
+Нет: `\.limit\(|\.where\(`
+
+---
+
 Что искать
 
 Большой SELECT
@@ -113,6 +127,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.fetchOne\(`
+
+---
+
 Почему
 
 jOOQ проверяет,
@@ -135,6 +155,12 @@ Low
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.fetchAny\(`
+
+---
+
 Проверить корректность бизнес-логики.
 
 ---
@@ -148,6 +174,12 @@ DSLContext используется внутри цикла
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\b(dsl|dslContext|create|ctx)\.(select\w*|fetch\w*|insertInto|update|deleteFrom|delete|executeInsert|executeUpdate|executeDelete)\(|\.(forEach|map|flatMap)\(.*\b(dsl|dslContext|create|ctx)\.(select\w*|fetch\w*|insertInto|update|deleteFrom|delete|executeInsert|executeUpdate|executeDelete)\(`
 
 ---
 
@@ -191,6 +223,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.(insertInto|executeInsert|newRecord)\(|\.(forEach|map|flatMap)\(.*\.(insertInto|executeInsert|newRecord)\(`
+
+---
+
 Исправление
 
 BatchInsert.
@@ -208,6 +246,12 @@ update()
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.(update|executeUpdate)\(|\.(forEach|map|flatMap)\(.*\.(update|executeUpdate)\(`
 
 ---
 
@@ -231,6 +275,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\.(deleteFrom|delete|executeDelete)\(|\.(forEach|map|flatMap)\(.*\.(deleteFrom|delete|executeDelete)\(`
+
+---
+
 Исправление
 
 Bulk DELETE.
@@ -246,6 +296,13 @@ Batch API не используется
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\.insertInto\(`
+Нет: `\.batch\w*\(`
 
 ---
 
@@ -279,6 +336,13 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.(store|insert)\(\)`
+Нет: `batchStore|batchInsert|\.batch\(`
+
+---
+
 # JOOQ-011
 
 ## Название
@@ -290,6 +354,12 @@ IN
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\.(in|notIn)\(\s*[a-zA-Z_]\w*(\.\w+\(\))?\s*\)`
 
 ---
 
@@ -312,6 +382,12 @@ OFFSET Pagination
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\.offset\(|\.limit\([^)]*,[^)]*\)`
 
 ---
 
@@ -347,6 +423,13 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.(offset|limit)\(`
+Нет: `\.seek\w*\(|seekAfter|seekBefore`
+
+---
+
 Почему
 
 Seek Pagination
@@ -364,6 +447,12 @@ SELECT *
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\.select\(\s*\)|asterisk\(\)|field\(\s*\"\*\"`
 
 ---
 
@@ -391,6 +480,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.selectFrom\(`
+
+---
+
 Почему
 
 Возвращаются все столбцы.
@@ -406,6 +501,12 @@ Record используется вместо DTO
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\b(Result|List)<(Record\d*(<[^>]*>)?|\w+Record)>|\bRecord\d?(<[^>]*>)?\s+\w+\s*=`
 
 ---
 
@@ -431,6 +532,13 @@ Low
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.fetch\(\)\s*(\n\s*)?\.(map|stream)\(`
+Нет: `mapping\(|Records\.`
+
+---
+
 Рекомендация
 
 Использовать
@@ -453,6 +561,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.fetchInto\(`
+
+---
+
 Почему
 
 Создаются тысячи объектов.
@@ -468,6 +582,13 @@ Streaming отсутствует
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\.fetch\(\)\s*(\n\s*)?\.(stream|forEach)\(|:\s*[^)]*\.fetch\(\)\s*\)`
+Нет: `fetchStream|fetchLazy`
 
 ---
 
@@ -491,6 +612,13 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `fetchStream\(|Cursor<|fetchLazy\(`
+Нет: `try\s*\(|\.close\(\)|\.use\s*\{`
+
+---
+
 Последствия
 
 Утечки соединений.
@@ -508,6 +636,13 @@ fetchLazy()
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `fetchLazy\(`
+Нет: `try\s*\(|\.use\s*\{`
 
 ---
 
@@ -529,6 +664,13 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `fetchLazy\(|fetchStream\(`
+Нет: `\.fetchSize\(`
+
+---
+
 Почему
 
 Драйвер может загрузить весь ResultSet.
@@ -544,6 +686,12 @@ High
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `noCondition\(\)|trueCondition\(\)|=\s*\w+\.(and|or)\(`
 
 ---
 
@@ -583,6 +731,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `\.formatJSON\(|\.intoJSON\(|(objectMapper|mapper|gson)\.(writeValueAsString|toJson)\(.*(fetch|Record)`
+
+---
+
 Почему
 
 Лишняя CPU-нагрузка.
@@ -600,6 +754,13 @@ Medium
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\.(onConflict|onDuplicateKeyUpdate|onDuplicateKeyIgnore|mergeInto)\(`
+Нет: `\.batch\w*\(`
 
 ---
 
@@ -637,6 +798,13 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(for|while)\s*\(.*\)\s*\{[^}]*\n[^}]*\b(dsl|dslContext|create|ctx)\.(select\w*|fetch\w*|insertInto|update|deleteFrom|delete|executeInsert|executeUpdate|executeDelete)\(|\.(forEach|map|flatMap)\(.*\b(dsl|dslContext|create|ctx)\.(select\w*|fetch\w*|insertInto|update|deleteFrom|delete|executeInsert|executeUpdate|executeDelete)\(`
+Нет: `multiset\(`
+
+---
+
 Почему
 
 Часто позволяет избежать N+1.
@@ -654,6 +822,12 @@ Medium
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `\.(in|notIn|eq|gt|lt|ge|le)\(\s*(DSL\.)?select(One|From|Count)?\(|\.asField\(|field\(\s*(DSL\.)?select`
 
 ---
 

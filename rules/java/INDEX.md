@@ -1,0 +1,110 @@
+# Индекс правил: java
+
+Файл генерируется `scripts/build_index.py`, вручную не править.
+
+Правила отсортированы по severity. Читать нужно только блок сработавшего правила:
+`Read <dir>/<file> offset=<start> limit=<end-start+1>`.
+`grep:` — подсказка для инструмента Grep (ripgrep): `glob` :: `regex`. Если в regex есть `\n`, включить multiline.
+`нет:` — правило относится к файлам, где `regex` совпал, но этот второй regex не найден (проверка отсутствия, например `gzip` в nginx.conf).
+Совпадение — только кандидат на проблему; вывод делается после чтения кода и блока правила.
+
+- JAVA-001 [Critical] Repository внутри цикла (core.md:7-118) — grep: `*.java` :: `(?s)(for|while)\s*\([^\n]*\)\s*\{.{0,500}?([rR]epository\w*\.(find|save|exists|delete|count|get)\w*\(|[jJ]dbc\w*\.(update|query\w*|execute|batchUpdate)\(|[eE]ntityManager\.(find|persist|merge|createQuery)\()|\.(forEach|map)\([^\n]*[rR]epository\w*::`
+- JAVA-002 [Critical] REST внутри цикла (core.md:122-185) — grep: `*.java` :: `(?i)(resttemplate|webclient|feign\w*|restclient|httpclient)\w*\.(exchange|getFor\w+|postFor\w+|put|delete|get|post|retrieve|send)\(`
+- JAVA-003 [Critical] Kafka publish внутри цикла (core.md:189-238) — grep: `*.java` :: `(?i)(kafkatemplate|producer)\w*\.send\(`
+- JAVA-004 [Critical] Полное чтение таблицы (core.md:242-303) — grep: `*.java` :: `\.findAll\(\s*\)|(?i:select\s+\*\s+from\s+[\w.]+\s*[\"';)])`
+- JAVA-042 [Critical] Глобальная синхронизация (concurrency.md:73-119) — grep: `*.java` :: `synchronized\s*\(\s*[\w.]+\.class\s*\)|static\s+(final\s+)?synchronized|synchronized\s+static`
+- JAVA-043 [Critical] Длительная работа внутри synchronized (concurrency.md:123-171) — grep: `*.java` :: `(?s)\bsynchronized\b[^\n]*\{.{0,1000}?(jdbcTemplate|[jJ]dbc\w*|[rR]epository|[eE]ntityManager|\.query\w*\(|\.update\(|\.execute\w*\(|[rR]estTemplate|[wW]ebClient|[hH]ttp\w*Client|[kK]afka\w*|Files\.|\.sleep\(|\.send\(|Statement)`
+- JAVA-044 [Critical] REST внутри synchronized (concurrency.md:175-195) — grep: `*.java` :: `(?s)\bsynchronized\b[^\n]*\{.{0,1000}?(?i:resttemplate|webclient|httpclient|restclient|feign\w*|HttpURLConnection|\.retrieve\(|\.exchange\()`
+- JAVA-045 [Critical] Repository внутри synchronized (concurrency.md:199-219) — grep: `*.java` :: `(?s)\bsynchronized\b[^\n]*\{.{0,1000}?([rR]epository|jdbcTemplate|[jJ]dbc\w*|[eE]ntityManager|\.query\w*\(|\.update\(|\.execute\w*\(|Statement|\.save\()`
+- JAVA-046 [Critical] sleep() внутри synchronized (concurrency.md:223-253) — grep: `*.java` :: `(?s)\bsynchronized\b[^\n]*\{.{0,1000}?\.sleep\(`
+- JAVA-050 [Critical] Executors.newFixedThreadPool() (concurrency.md:368-406) — grep: `*.java` :: `Executors\.new(FixedThreadPool|SingleThreadExecutor|SingleThreadScheduledExecutor)\(`
+- JAVA-051 [Critical] Неограниченная BlockingQueue (concurrency.md:410-436) — grep: `*.java` :: `new\s+(LinkedBlockingQueue|LinkedBlockingDeque)\s*(<[^>]*>)?\(\s*\)|new\s+(ConcurrentLinkedQueue|ConcurrentLinkedDeque|LinkedTransferQueue|PriorityBlockingQueue)\b|Executors\.new(FixedThreadPool|SingleThreadExecutor)\(`
+- JAVA-058 [Critical] CountDownLatch не освобождается (concurrency.md:616-637) — grep: `*.java` :: `\bCountDownLatch\b` ; нет: `(?s)finally\s*\{[^}]*countDown\(`
+- JAVA-066 [Critical] CachedThreadPool для неконтролируемой нагрузки (concurrency.md:826-854) — grep: `*.java` :: `Executors\.newCachedThreadPool\(|new\s+SynchronousQueue|setMaxPoolSize\(\s*Integer\.MAX_VALUE|new\s+ThreadPoolExecutor\([^;]*MAX_VALUE`
+- JAVA-069 [Critical] Lock удерживается во время IO (concurrency.md:904-934) — grep: `*.java` :: `(?s)\b\w*[lL]ock\w*\.(lock|tryLock)\([^\n]*\)\s*;.{0,1000}?(jdbcTemplate|[jJ]dbc\w*|[rR]epository|[eE]ntityManager|\.query\w*\(|\.update\(|\.execute\w*\(|[rR]estTemplate|[wW]ebClient|[hH]ttp\w*Client|[kK]afka\w*|Files\.|\.sleep\(|\.send\(|Statement)`
+- JAVA-COL-001 [Critical] contains() на List в горячем цикле (collections.md:7-71) — grep: `*.java` :: `\w*[lL]ist\w*\.contains\(|\.stream\(\)[^\n]*\.contains\(`
+- JAVA-COL-003 [Critical] indexOf() внутри цикла (collections.md:110-130) — grep: `*.java` :: `\w*[lL]ist\w*\.(indexOf|lastIndexOf)\(|Arrays\.asList\([^)]*\)\.indexOf\(`
+- JAVA-COL-004 [Critical] Вложенные циклы по двум коллекциям (collections.md:134-174) — grep: `*.java` :: `(?m)^[ \t]*(for|while)\s*\([^\n]*\)\s*\{[ \t]*\n(?:[^\n]*\n){0,2}?[ \t]*(for|while)\s*\(`
+- JAVA-COL-021 [Critical] Сортировка внутри цикла (collections.md:596-617) — grep: `*.java` :: `(?s)(for|while)\s*\([^\n]*\)\s*\{.{0,400}?(Collections\.sort\(|\.sort\(|\.sorted\()`
+- JAVA-STR-001 [Critical] SQL внутри Stream (streams.md:7-68) — grep: `*.java` :: `\.(map|forEach|flatMap|filter|peek|mapToObj|anyMatch)\([^\n]*([rR]epository|[dD]ao|jdbcTemplate|[eE]ntityManager)\w*(::|\.)`
+- JAVA-STR-002 [Critical] REST вызов внутри Stream (streams.md:72-101) — grep: `*.java` :: `(?i)\.(map|foreach|flatmap|filter|peek)\([^\n]*(rest|webclient|feign|httpclient)\w*(::|\.)`
+- JAVA-STR-004 [Critical] Вложенные Stream (streams.md:129-165) — grep: `*.java` :: `\.(stream|parallelStream)\(\)[^\n]*->[^\n]*\.(stream|parallelStream)\(\)|\.(flatMap|map|forEach|filter|anyMatch)\([^\n]*->[^\n]*\.stream\(\)`
+- JAVA-STR-014 [Critical] parallelStream() (streams.md:412-434) — grep: `*.java` :: `(?is)(parallelstream\(\)|\.parallel\(\))[^;]{0,500}?(repository|\bdao|jdbc|entitymanager|\.query\()`
+- JAVA-STR-015 [Critical] parallelStream() (streams.md:438-460) — grep: `*.java` :: `(?is)(parallelstream\(\)|\.parallel\(\))[^;]{0,500}?(resttemplate|webclient|feign|httpclient|restclient)`
+- JAVA-STR-025 [Critical] Stream ограничивает масштабирование (streams.md:688-749)
+- JAVA-005 [High] contains() по ArrayList внутри цикла (core.md:307-353) — grep: `*.java` :: `\w*[lL]ist\w*\.contains\(`
+- JAVA-006 [High] remove() по ArrayList внутри цикла (core.md:357-393) — grep: `*.java` :: `\w*[lL]ist\w*\.remove\(|\.remove\(\s*0\s*\)`
+- JAVA-007 [High] Вложенные циклы (core.md:397-443) — grep: `*.java` :: `(?m)^[ \t]*(for|while)\s*\([^\n]*\)\s*\{[ \t]*\n(?:[^\n]*\n){0,2}?[ \t]*(for|while)\s*\(`
+- JAVA-010 [High] Thread.sleep() (core.md:522-562) — grep: `*.java` :: `\b(Thread|TimeUnit\.\w+)\.sleep\(`
+- JAVA-018 [High] Большие промежуточные списки (core.md:806-838) — grep: `*.java` :: `\.(findAll|readAllLines|readAllBytes|fetchAll|selectAll)\(|Collectors\.toList\(\)`
+- JAVA-019 [High] Неограниченный рост HashMap (core.md:842-868) — grep: `*.java` :: `(?m)^\s*(private|protected|public|static)[^=(;]*\b(Map|HashMap|LinkedHashMap|ConcurrentHashMap|TreeMap)<[^=(;]*>\s+\w+\s*=\s*new\b`
+- JAVA-041 [High] synchronized на горячем пути (concurrency.md:7-69) — grep: `*.java` :: `\bsynchronized\b`
+- JAVA-047 [High] Небезопасный double-checked locking (concurrency.md:257-296) — grep: `*.java` :: `(?s)==\s*null\s*\)\s*\{\s*synchronized\s*\(` ; нет: `\bvolatile\b`
+- JAVA-048 [High] Небезопасный Singleton (concurrency.md:300-323) — grep: `*.java` :: `static\s+[\w<>]+\s+getInstance\s*\(` ; нет: `synchronized|\bvolatile\b|\benum\s+\w+|Holder|AtomicReference`
+- JAVA-049 [High] ThreadLocal без очистки (concurrency.md:327-364) — grep: `*.java` :: `\bThreadLocal\b` ; нет: `(?i)(local|holder|context|tl)\w*\.remove\(\)`
+- JAVA-052 [High] Один Executor для всех задач (concurrency.md:440-466) — grep: `*.java` :: `(?m)^\s*@Async\s*$|Executors\.newFixedThreadPool\(|static\s+(final\s+)?ExecutorService\b|@EnableAsync`
+- JAVA-053 [High] CompletableFuture.join() (concurrency.md:470-498) — grep: `*.java` :: `CompletableFuture::join|(supplyAsync|runAsync|thenApply\w*|thenCompose)\([^\n]*\)\.join\(\)|\.map\([^\n]*\.join\(\)\)|[fF]uture\w*\.join\(\)`
+- JAVA-056 [High] Busy Waiting (concurrency.md:552-588) — grep: `*.java` :: `while\s*\(\s*(true|!?[a-z]\w*(\.(get|isDone|isEmpty|isAlive|isCancelled|isLocked|isRunning)\(\))?)\s*\)|while\s*\([^\n)]*\)\s*(;|\{\s*\})`
+- JAVA-059 [High] Future.get() (concurrency.md:641-669) — grep: `*.java` :: `(?i)(future|\bfut|\btask|promise)\w*\.get\(\)|\.submit\([^\n]*\)\.get\(\)`
+- JAVA-062 [High] Shared Mutable State (concurrency.md:721-741) — grep: `*.java` :: `(?m)^\s*(private|protected|public|static)[^=(;]*\b(Map|List|Set|HashMap|HashSet|ArrayList|LinkedHashMap|TreeMap)<[^=(;]*>\s+\w+\s*=\s*new\s+(HashMap|HashSet|ArrayList|LinkedHashMap|TreeMap|LinkedList)\b|\bstatic\s+(int|long|boolean|String|Date)\s+\w+\s*(=|;)`
+- JAVA-063 [High] Большая критическая секция (concurrency.md:745-765) — grep: `*.java` :: `synchronized[^\n]*\{[ \t]*\n(?:[^\n]*\n){25}`
+- JAVA-067 [High] ScheduledExecutor выполняет длительные задачи (concurrency.md:858-878) — grep: `*.java` :: `@Scheduled\b|\.schedule(AtFixedRate|WithFixedDelay)?\(|newScheduledThreadPool|newSingleThreadScheduledExecutor`
+- JAVA-COL-002 [High] remove() из ArrayList в цикле (collections.md:75-106) — grep: `*.java` :: `\w*[lL]ist\w*\.remove\(|\.remove\(\s*0\s*\)`
+- JAVA-COL-005 [High] Поиск объекта перебором (collections.md:178-198) — grep: `*.java` :: `(?s)\.(filter|anyMatch)\([^;]{0,120}?(equals|==)[^;]{0,120}?\)\s*\.(findFirst|findAny|orElse\w*)\(|\.anyMatch\([^;\n]*(equals|==)`
+- JAVA-COL-013 [High] CopyOnWriteArrayList для частой записи (collections.md:376-396) — grep: `*.java` :: `\bCopyOnWrite(ArrayList|ArraySet)\b`
+- JAVA-COL-025 [High] Коллекции ограничивают масштабирование (collections.md:685-744)
+- JAVA-STR-003 [High] Kafka publish внутри Stream (streams.md:105-125) — grep: `*.java` :: `(?i)\.(map|foreach|flatmap|filter|peek)\([^\n]*(kafka|producer)\w*(::|\.)`
+- JAVA-STR-005 [High] contains() внутри Stream (streams.md:169-201) — grep: `*.java` :: `\.(filter|anyMatch|noneMatch|allMatch)\([^\n]*\.(contains|indexOf)\(`
+- JAVA-STR-010 [High] sorted() (streams.md:307-329) — grep: `*.java` :: `\.sorted\(`
+- JAVA-STR-020 [High] Повторная сортировка (streams.md:564-585) — grep: `*.java` :: `(?s)\.sorted\([^;]{0,200}?\.sorted\(`
+- JAVA-008 [Medium] Вложенные Stream API (core.md:447-484) — grep: `*.java` :: `\.(stream|parallelStream)\(\)[^\n]*->[^\n]*\.(stream|parallelStream)\(\)|\.(flatMap|map|forEach|filter|anyMatch)\([^\n]*->[^\n]*\.stream\(\)`
+- JAVA-009 [Medium] parallelStream() без необходимости (core.md:488-518) — grep: `*.java` :: `\.parallelStream\(\)|\.parallel\(\)`
+- JAVA-011 [Medium] Создание ObjectMapper в горячем коде (core.md:566-596) — grep: `*.java` :: `new\s+(\w+\.)*ObjectMapper\(`
+- JAVA-012 [Medium] Pattern.compile() в цикле (core.md:600-622) — grep: `*.java` :: `Pattern\.compile\(|\.(matches|replaceAll|replaceFirst)\(\s*\"`
+- JAVA-013 [Medium] String concat в цикле (core.md:626-656) — grep: `*.java` :: `\w+\s*\+=\s*[^;]*\"`
+- JAVA-014 [Medium] BigDecimal в горячем цикле (core.md:660-688) — grep: `*.java` :: `\bBigDecimal\b`
+- JAVA-015 [Medium] Reflection в горячем пути (core.md:692-731) — grep: `*.java` :: `Class\.forName\(|\.getDeclared(Method|Field|Constructor)s?\(|\.getMethods?\(\s*\"|\.newInstance\(|\bMethod\b[^\n]*\.invoke\(|BeanUtils\.\w+\(`
+- JAVA-016 [Medium] Autoboxing в цикле (core.md:735-763) — grep: `*.java` :: `\b(List|Set|Map|Queue|Deque|Stream|Collection)<(Integer|Long|Double|Float|Short|Byte|Character)\b|\b(Integer|Long|Double|Float)\s+\w+\s*=\s*\d+[LlDdFf]?\s*;`
+- JAVA-017 [Medium] Лишние временные коллекции (core.md:767-802) — grep: `*.java` :: `\.(collect\([^\n]*\)|toList\(\))\s*\.(stream|forEach)\(`
+- JAVA-054 [Medium] CompletableFuture без Executor (concurrency.md:502-522) — grep: `*.java` :: `\b(supplyAsync|runAsync)\(`
+- JAVA-055 [Medium] ForkJoinPool.commonPool() (concurrency.md:526-548) — grep: `*.java` :: `ForkJoinPool\.commonPool\(\)|\.parallelStream\(\)|\b(supplyAsync|runAsync)\(`
+- JAVA-057 [Medium] Spin Lock (concurrency.md:592-612) — grep: `*.java` :: `while\s*\([^\n]*(compareAndSet|getAndSet)\(|Thread\.(onSpinWait|yield)\(`
+- JAVA-060 [Medium] ReadWriteLock используется при преобладании записи (concurrency.md:673-693) — grep: `*.java` :: `\b(Reentrant)?ReadWriteLock\b|\bStampedLock\b`
+- JAVA-061 [Medium] AtomicLong под высокой конкуренцией (concurrency.md:697-717) — grep: `*.java` :: `\bAtomic(Long|Integer)\b`
+- JAVA-064 [Medium] Executor без graceful shutdown (concurrency.md:769-790) — grep: `*.java` :: `Executors\.new\w+\(|new\s+(Scheduled)?ThreadPoolExecutor\(|new\s+ForkJoinPool\(` ; нет: `shutdown|@PreDestroy|DisposableBean|destroyMethod`
+- JAVA-065 [Medium] Создание Thread вручную (concurrency.md:794-822) — grep: `*.java` :: `new\s+Thread\(|extends\s+Thread\b`
+- JAVA-068 [Medium] Синхронная обработка независимых задач (concurrency.md:882-900)
+- JAVA-070 [Medium] Отсутствие timeout при ожидании блокировки (concurrency.md:938-978) — grep: `*.java` :: `\b\w*[lL]ock\w*\.(lock|lockInterruptibly|tryLock)\(\)`
+- JAVA-COL-006 [Medium] HashMap создается в каждой итерации (collections.md:202-222) — grep: `*.java` :: `(?s)(for|while)\s*\([^\n]*\)\s*\{.{0,400}?new\s+(Hash|LinkedHash|Tree|Concurrent)?(Hash)?Map\s*[<(]`
+- JAVA-COL-007 [Medium] Повторное построение одинаковой Map (collections.md:226-246) — grep: `*.java` :: `Collectors\.(toMap|groupingBy)\(`
+- JAVA-COL-008 [Medium] ArrayList без начальной емкости (collections.md:250-282) — grep: `*.java` :: `new\s+ArrayList<[^>]*>\(\s*\)`
+- JAVA-COL-009 [Medium] HashMap без initialCapacity (collections.md:286-306) — grep: `*.java` :: `new\s+(Linked)?HashMap<[^>]*>\(\s*\)`
+- JAVA-COL-010 [Medium] HashSet без initialCapacity (collections.md:310-324) — grep: `*.java` :: `new\s+(Linked)?HashSet<[^>]*>\(\s*\)`
+- JAVA-COL-011 [Medium] LinkedList используется как List (collections.md:328-348) — grep: `*.java` :: `\bLinkedList\s*<|new\s+LinkedList\b`
+- JAVA-COL-014 [Medium] Collections.synchronizedList() (collections.md:400-421) — grep: `*.java` :: `Collections\.synchronized(List|Map|Set|Collection|SortedMap|SortedSet)\(`
+- JAVA-COL-015 [Medium] ConcurrentHashMap не используется (collections.md:425-448) — grep: `*.java` :: `(?m)^\s*(private|protected|public|static)[^=(;]*\b(Map|List|Set|HashMap|HashSet|ArrayList|LinkedHashMap|TreeMap)<[^=(;]*>\s+\w+\s*=\s*new\s+(HashMap|HashSet|ArrayList|LinkedHashMap|TreeMap|LinkedList)\b`
+- JAVA-COL-018 [Medium] toArray() (collections.md:516-538) — grep: `*.java` :: `\.toArray\(`
+- JAVA-COL-019 [Medium] Создание временных коллекций (collections.md:542-568) — grep: `*.java` :: `(?s)(for|while)\s*\([^\n]*\)\s*\{.{0,400}?new\s+(ArrayList|HashMap|HashSet|LinkedList|LinkedHashMap|TreeMap|TreeSet)\b`
+- JAVA-COL-020 [Medium] Коллекция используется только для поиска (collections.md:572-592) — grep: `*.java` :: `\w*[lL]ist\w*\.contains\(`
+- JAVA-COL-023 [Medium] merge нескольких коллекций (collections.md:641-657) — grep: `*.java` :: `(?s)(for|while)\s*\([^\n]*\)\s*\{.{0,400}?(\.addAll\(|\.putAll\(|Stream\.concat\()`
+- JAVA-COL-024 [Medium] Большая коллекция удерживается дольше необходимого (collections.md:661-681) — grep: `*.java` :: `(?m)^\s*(private|protected|public)?\s*static\s+(final\s+)?[\w.]*(Map|List|Set|Queue|Deque|Collection)<`
+- JAVA-STR-009 [Medium] collect(toList()) (streams.md:281-303) — grep: `*.java` :: `\.collect\(Collectors\.toList\(\)\)|\.toList\(\)`
+- JAVA-STR-011 [Medium] distinct() (streams.md:333-355) — grep: `*.java` :: `\.distinct\(\)`
+- JAVA-STR-012 [Medium] peek() (streams.md:359-382) — grep: `*.java` :: `\.peek\(`
+- JAVA-STR-013 [Medium] parallelStream() (streams.md:386-408) — grep: `*.java` :: `\.parallelStream\(\)|\.parallel\(\)`
+- JAVA-STR-016 [Medium] parallelStream() (streams.md:464-485) — grep: `*.java` :: `(?is)(parallelstream\(\)|\.parallel\(\))[^;]{0,500}?(kafka|producer)`
+- JAVA-STR-017 [Medium] Создание объектов внутри map() (streams.md:489-509) — grep: `*.java` :: `\.(map|flatMap|mapToObj)\([^\n]*->[^\n]*\bnew\s+[A-Z]\w*[(<]`
+- JAVA-STR-018 [Medium] Боксинг примитивов (streams.md:513-541) — grep: `*.java` :: `\bStream<(Integer|Long|Double)>|\.boxed\(\)|\.reduce\(\s*0L?\s*,\s*(Integer|Long)::sum`
+- JAVA-STR-019 [Medium] Повторное создание Stream (streams.md:545-560)
+- JAVA-STR-021 [Medium] collect(groupingBy()) (streams.md:589-611) — grep: `*.java` :: `Collectors\.(groupingBy|groupingByConcurrent|partitioningBy)\(`
+- JAVA-STR-022 [Medium] flatMap() (streams.md:615-631) — grep: `*.java` :: `\.flatMap\(`
+- JAVA-020 [Low] HashMap без initial capacity (core.md:872-914) — grep: `*.java` :: `new\s+(Linked|Concurrent)?HashMap<[^>]*>\(\s*\)`
+- JAVA-COL-012 [Low] Vector используется без необходимости (collections.md:352-372) — grep: `*.java` :: `\b(Vector|Hashtable|Stack)\s*<|new\s+(Vector|Hashtable|Stack)\s*[(<]`
+- JAVA-COL-016 [Low] containsKey() (collections.md:452-492) — grep: `*.java` :: `\.containsKey\(`
+- JAVA-COL-017 [Low] computeIfAbsent() (collections.md:496-512) — grep: `*.java` :: `if\s*\(\s*\w+\.get\([^)]*\)\s*==\s*null\s*\)|!\w+\.containsKey\(`
+- JAVA-COL-022 [Low] distinct() (collections.md:621-637) — grep: `*.java` :: `\.distinct\(\)`
+- JAVA-STR-006 [Low] findFirst() (streams.md:205-227) — grep: `*.java` :: `(?s)\.(sorted|collect|distinct)\([^;]{0,200}?\.(findFirst|findAny)\(`
+- JAVA-STR-007 [Low] Несколько filter подряд (streams.md:231-253) — grep: `*.java` :: `(?s)\.filter\([^;]{0,150}?\.filter\(`
+- JAVA-STR-008 [Low] Несколько map подряд (streams.md:257-277) — grep: `*.java` :: `(?s)\.map\([^;]{0,150}?\.map\(`
+- JAVA-STR-023 [Low] Stream используется вместо простого цикла (streams.md:635-657) — grep: `*.java` :: `\.stream\(\)\s*\.forEach\(|IntStream\.range(Closed)?\([^;]*\)\s*\.forEach\(`
+- JAVA-STR-024 [Low] Длинный Stream Pipeline (streams.md:661-684) — grep: `*.java` :: `(?m)(^[ \t]*\.\w+\([^\n]*\n){6}`

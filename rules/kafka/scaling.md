@@ -24,6 +24,12 @@ Scalability
 
 ---
 
+### Grep
+
+`*.{java,kt,yml,yaml,properties,sh,py}` :: `\.partitions\(\s*[1-3]\s*\)|new NewTopic\(\s*[^,]+,\s*[1-3]\s*,|--partitions[= ]+[1-3]\b|\bpartitions\W{0,4}[1-3]\b|num[._]partitions\W{0,4}[1-3]\b|partition-?[cC]ount\W{0,4}[1-3]\b`
+
+---
+
 ### Что искать
 
 Один Consumer Group
@@ -70,6 +76,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt,yml,yaml,properties,sh,py}` :: `\.partitions\(\s*\d{3,}\s*\)|new NewTopic\(\s*[^,]+,\s*\d{3,}\s*,|--partitions[= ]+\d{3,}\b|\bpartitions\W{0,4}\d{3,}\b|num[._]partitions\W{0,4}\d{3,}\b`
+
+---
+
 Почему
 
 Каждая Partition требует ресурсов Broker.
@@ -87,6 +99,12 @@ Hot Partition
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `(ProducerRecord<[^>]*>|\.send)\(\s*[^,()]+,\s*([^,()]*([sS]tatus|[tT]ype|[cC]ountry|[tT]enant|[rR]egion|[cC]ategory|[lL]ang)\w*(\(\))?|"[^"]*")\s*,`
 
 ---
 
@@ -143,6 +161,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt,py}` :: `(ProducerRecord<[^>]*>|\.send)\([^)]*(randomUUID|ThreadLocalRandom|new Random|nanoTime|currentTimeMillis)|(produce|send)\(.*uuid4\(`
+
+---
+
 Почему
 
 Нарушается локальность данных.
@@ -160,6 +184,12 @@ Partition Key не соответствует бизнес-сущности
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `([kK]afka\w*|[pP]roducer)\.send\(\s*[\w."]+\s*,\s*[^,]*\)|new ProducerRecord<[^>]*>\(\s*[\w."]+\s*,\s*[^,]*\)`
 
 ---
 
@@ -193,6 +223,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `partitioner\.class|PARTITIONER_CLASS_CONFIG|implements Partitioner|ProducerRecord<[^>]*>\(\s*[^,()]+,\s*\d+\s*,|[kK]afkaTemplate\.send\(\s*[^,()]+,\s*\d+\s*,`
+
+---
+
 Почему
 
 Kafka гарантирует порядок
@@ -209,6 +245,12 @@ Kafka гарантирует порядок
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt,yml,yaml,properties}` :: `setConcurrency\(|@KafkaListener\([^)]*concurrency|\bconcurrency\W{1,4}\d+|listener\.concurrency`
 
 ---
 
@@ -231,6 +273,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `groupId\s*=\s*"|group[._-]id\W{1,4}\S|GROUP_ID_CONFIG|group_id\s*=|groupId.*(randomUUID|random)`
+
+---
+
 Почему
 
 Broker вынужден обслуживать
@@ -247,6 +295,12 @@ Broker вынужден обслуживать
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `session[._-]timeout[._-]ms\W{0,6}\d{1,4}\b|SESSION_TIMEOUT_MS_CONFIG|heartbeat[._-]interval[._-]ms|ConsumerRebalanceListener|onPartitionsRevoked|group[._-]instance[._-]id`
 
 ---
 
@@ -273,6 +327,13 @@ Sticky Assignor не используется
 Severity
 
 Low
+
+---
+
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `ConsumerConfig\.\w+|new KafkaConsumer|DefaultKafkaConsumerFactory|spring\.kafka\.consumer|\bconsumer:`
+Нет: `partition[._-]assignment[._-]strategy|PARTITION_ASSIGNMENT_STRATEGY|CooperativeSticky|StickyAssignor|group[._-]instance[._-]id`
 
 ---
 
@@ -397,6 +458,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(ProducerRecord<[^>]*>|\.send)\([^)]*(readAllBytes|toByteArray|Files\.read|getBytes)`
+
+---
+
 Последствия
 
 - рост Network IO
@@ -414,6 +481,13 @@ High
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `ProducerConfig\.\w+|new KafkaProducer|DefaultKafkaProducerFactory|spring\.kafka\.producer|\bproducer:`
+Нет: `compression[._-](type|codec)|COMPRESSION_TYPE_CONFIG`
 
 ---
 

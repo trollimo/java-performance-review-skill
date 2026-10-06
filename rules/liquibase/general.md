@@ -24,6 +24,13 @@ Schema
 
 ---
 
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)<createTable\b|createTable:|create\s+table\b`
+Нет: `(?i)primaryKey|primary\s+key|primary_key`
+
+---
+
 ### Что искать
 
 ```xml
@@ -65,6 +72,13 @@ Foreign Key без индекса
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)addForeignKeyConstraint|foreignKeyName|referencedTableName|\bforeign\s+key\b|\breferences\s*[=:]|\breferences\s+\w+\s*\(`
+Нет: `(?i)createIndex|create\s+(unique\s+)?index`
 
 ---
 
@@ -156,6 +170,12 @@ High
 
 ---
 
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)<createIndex[^>]*>\s*<column[^>]*/>\s*<column|create\s+(unique\s+)?index[^;(]*\([^)]*,|createIndex:(?:.|\n){0,400}?- column:(?:.|\n){0,200}?- column:`
+
+---
+
 Пример
 
 ```
@@ -179,6 +199,12 @@ WHERE created_at=...
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)<createIndex\b|createIndex:|create\s+(unique\s+)?index\b`
 
 ---
 
@@ -208,6 +234,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)<createIndex[^>]*>(\s*<column[^>]*/>){4,}|create\s+(unique\s+)?index[^;(]*\([^)]*,[^)]*,[^)]*,[^)]*\)|createIndex:(?:(?:.|\n){0,80}?- column:){4}`
+
+---
+
 Что искать
 
 Индекс
@@ -225,6 +257,12 @@ UUID как Primary Key
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)type="(uuid|varchar\(36\)|char\(36\))"|type:\s*[\'"]?(uuid|varchar\(36\)|char\(36\))|\buuid\b.{0,40}primary key|gen_random_uuid|uuid_generate_v4`
 
 ---
 
@@ -260,6 +298,12 @@ Low
 
 ---
 
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)varchar2?\(\s*\d{4,}\s*\)`
+
+---
+
 Почему
 
 Проверить,
@@ -281,6 +325,12 @@ TEXT
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)type="(text|clob|longtext)"|type:\s*[\'"]?(text|clob|longtext)\b|\w+\s+text\s+(not null|null|default)|\w+\s+text\s*[,)]`
 
 ---
 
@@ -306,6 +356,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)type="json"|type:\s*[\'"]?json\b|\w+\s+json\s*(not null|null|default|,|\))`
+
+---
+
 Почему
 
 JSONB
@@ -325,6 +381,13 @@ JSONB
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)jsonb`
+Нет: `(?i)using\s+gin|\bgin\b|jsonb_path_ops`
 
 ---
 
@@ -350,6 +413,12 @@ Low
 
 ---
 
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)(createIndex|create\s+(unique\s+)?index)\b[^\n]*\b(is_\w+|has_\w+|active|enabled|deleted|archived|flag\w*)\b|createIndex\b(?:.|\n){0,300}?(column\s+name=|name:\s*)[\'"]?(is_\w+|has_\w+|active|enabled|deleted|archived)\b`
+
+---
+
 Почему
 
 Часто имеет низкую селективность.
@@ -365,6 +434,13 @@ TIMESTAMP без индекса
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)type="(timestamp|datetime|timestamptz)|type:\s*[\'"]?(timestamp|datetime|timestamptz)|\s(timestamp|timestamptz)\s+(not null|null|default|with|without|,|\))`
+Нет: `(?i)createIndex|create\s+(unique\s+)?index`
 
 ---
 
@@ -389,6 +465,12 @@ CREATE INDEX
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)<createIndex\b|createIndex:|create\s+(unique\s+)?index\s+(if\s+not\s+exists\s+)?[\w."]+\s+on\b`
 
 ---
 
@@ -420,6 +502,12 @@ High
 
 ---
 
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)alter\s+table|<?(addColumn|modifyDataType|addNotNullConstraint|addUniqueConstraint|addForeignKeyConstraint|renameColumn|dropColumn|addPrimaryKey)\b[:\s>]`
+
+---
+
 Рекомендация
 
 Проверить,
@@ -443,6 +531,12 @@ NOT NULL
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)addNotNullConstraint|set\s+not\s+null|add\s+column[^;]*not\s+null|<addColumn(?:.|\n){0,300}?nullable="false"|addColumn:(?:.|\n){0,300}?nullable:\s*false`
 
 ---
 
@@ -470,6 +564,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)<addColumn(?:.|\n){0,300}?defaultValue\w*=|addColumn:(?:.|\n){0,300}?defaultValue\w*:|add\s+column[^;]*\bdefault\b|<addDefaultValue|addDefaultValue:`
+
+---
+
 Рекомендация
 
 Проверить версию PostgreSQL
@@ -487,6 +587,13 @@ Medium
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)createIndex(?:.|\n){0,300}?(name=|name:\s*|columnNames=)[\'"]?\w*(status|deleted|active|tenant_id|archived)\b|create\s+(unique\s+)?index[^;]*\([^)]*(status|deleted|active|tenant_id)`
+Нет: `(?i)\bwhere\b|\bpartial\b`
 
 ---
 
@@ -531,6 +638,13 @@ Medium
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)create\s+table[^;(]*\b\w*(event|audit|history|log|message|telemetry|metric)s?\b|<createTable[^>]*tableName="\w*(event|audit|history|log|message|telemetry|metric)\w*"|createTable:(?:.|\n){0,100}?tableName:\s*[\'"]?\w*(event|audit|history|log|message|telemetry|metric)`
+Нет: `(?i)partition`
 
 ---
 
@@ -584,6 +698,13 @@ Medium
 
 ---
 
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)create\s+table[^;(]*\b\w*(event|audit|history|log|message|telemetry|metric)s?\b|<createTable[^>]*tableName="\w*(event|audit|history|log|message|telemetry|metric)\w*"|createTable:(?:.|\n){0,100}?tableName:\s*[\'"]?\w*(event|audit|history|log|message|telemetry|metric)`
+Нет: `(?i)retention|purge|cleanup|\bttl\b|expire|pg_partman|drop\s+partition|delete\s+from`
+
+---
+
 Что проверить
 
 Логи
@@ -605,6 +726,12 @@ Medium
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)(?:(?:<createIndex\b|createIndex:|create\s+(unique\s+)?index\b)(?:.|\n)*?){6}`
 
 ---
 
@@ -630,6 +757,13 @@ Info
 
 ---
 
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)<sql\b|<sqlFile|splitStatements|<createProcedure|<createFunction|<createView|<update\b`
+Нет: `<comment>|<!--|comment:|--\s*\w`
+
+---
+
 Упростит сопровождение.
 
 ---
@@ -643,6 +777,13 @@ Rollback отсутствует
 Severity
 
 Low
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)<changeSet\b|-\s*changeSet:|--\s*changeset\s`
+Нет: `(?i)<rollback|rollback:|--\s*rollback`
 
 ---
 
@@ -668,6 +809,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.xml` :: `<changeSet\b[^>]*>(?:(?:[^<\n]|\n|<[^/]|</[^c]|</c[^h])*?<(?:createTable|addColumn|createIndex|dropColumn|dropTable|addForeignKeyConstraint|modifyDataType|renameTable|renameColumn|sql|update|insert|delete)\b){5}`
+
+---
+
 Почему
 
 Сложнее откатывать
@@ -689,6 +836,12 @@ Medium
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{xml,yaml,yml,sql}` :: `(?i)<update\b|<delete\b|\bupdate:|\bdelete:|\bupdate\s+\w+\s+set\b|\bdelete\s+from\b|insert\s+into\s+\w+[^;]*\bselect\b`
 
 ---
 
@@ -726,6 +879,12 @@ High
 Severity
 
 Info
+
+---
+
+### Grep
+
+`*.{yml,yaml,properties,java,kt}` :: `spring\.liquibase|\bliquibase:|SpringLiquibase|liquibase\s+(update|migrate)`
 
 ---
 

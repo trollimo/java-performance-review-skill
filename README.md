@@ -77,7 +77,12 @@ Unlike traditional linters, it focuses on **performance engineering** rather tha
 ```text
 SKILL.md                Entry point for AI agents
 rules/                  Technology-specific performance rules
+rules/INDEX.md          Compact rule index (generated, read first by agents)
                         (java, kotlin, python, django, spring, hibernate, ...)
+scripts/                build_index.py - regenerates the rule indexes
+                        scan.py - runs all grep hints over a repo, prints fired rules
+                        check_grep.py - validates hints, measures noise
+                        render_report.py - findings JSON -> HTML report (score, A-F scale, clickable rules)
 docs/                   Documentation and maintenance guides
 prompts/                Example prompts
 taxonomy/               Rule classification

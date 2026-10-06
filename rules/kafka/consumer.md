@@ -24,6 +24,12 @@ Consumer
 
 ---
 
+### Grep
+
+`*.{java,kt,py}` :: `for \((final )?\w+(<[^>]*>)? \w+ : \w*[rR]ecords\)|for \(\w+ in \w*[rR]ecords\)|[rR]ecords\.(forEach|iterator)|for \w+ in \w*consumer\b`
+
+---
+
 ### Что искать
 
 ```
@@ -71,6 +77,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt,py}` :: `(@KafkaListener|\.poll\()(?:.|\n){0,2500}?(restTemplate|RestTemplate|webClient|WebClient|HttpClient|httpClient|RestClient|OkHttp|\.postForObject|\.getForObject|requests\.(get|post|put)\(|httpx\.)`
+
+---
+
 Почему
 
 Во время ожидания ответа Consumer не читает Kafka.
@@ -94,6 +106,12 @@ Consumer выполняет SQL в цикле
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `(for \([^)]*[rR]ecords\)|[rR]ecords\.forEach)(?:.|\n){0,800}?([rR]epository|[jJ]dbcTemplate|entityManager|[dD]ao)\w*\.(find|get|select|query|exists|save|insert|update|count)\w*\(`
 
 ---
 
@@ -137,6 +155,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt,py}` :: `(@KafkaListener|\.poll\()(?:.|\n){0,2500}?([A-Za-z]+Client\w*|\w+Stub|[fF]eign\w*|[sS]oap\w*)\.\w+\(`
+
+---
+
 Почему
 
 Kafka превращается
@@ -153,6 +177,12 @@ max.poll.records слишком большой
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `max[._-]poll[._-]records\W{0,6}(\d{4,}|[5-9]\d\d)\b|MAX_POLL_RECORDS_CONFIG\W{1,4}(\d{4,}|[5-9]\d\d)\b`
 
 ---
 
@@ -176,6 +206,12 @@ Low
 
 ---
 
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `max[._-]poll[._-]records\W{0,6}[1-9]\d?\b|MAX_POLL_RECORDS_CONFIG\W{1,4}[1-9]\d?\b`
+
+---
+
 Почему
 
 Лишние обращения к брокеру.
@@ -191,6 +227,12 @@ commitSync()
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt,py}` :: `\.commitSync\(|([cC]onsumer)\.commit\(`
 
 ---
 
@@ -220,6 +262,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt,py}` :: `(for \([^)]*[rR]ecords\)|[rR]ecords\.forEach|for \w+ in \w*consumer\b)(?:.|\n){0,1500}?\.(commitSync|commitAsync|acknowledge|commit)\(|ack-mode\W{0,3}(record|RECORD)|AckMode\.RECORD\b`
+
+---
+
 Почему
 
 Большое количество сетевых операций.
@@ -235,6 +283,12 @@ Auto Commit используется без анализа
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `enable[._-]auto[._-]commit\W{0,6}(true|True)\b|ENABLE_AUTO_COMMIT_CONFIG\W{1,4}true\b|auto[._-]commit[._-]interval[._-]ms`
 
 ---
 
@@ -258,6 +312,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `@KafkaListener(?:.|\n){0,1500}?(@Transactional|[tT]ransactionTemplate|executeWithoutResult)|@Transactional(?:.|\n){0,300}?@KafkaListener`
+
+---
+
 Почему
 
 Рост Consumer Lag.
@@ -273,6 +333,12 @@ Critical
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `max[._-]poll[._-]interval[._-]ms\W{0,6}\d{7,}|MAX_POLL_INTERVAL_MS_CONFIG\W{1,4}\d{7,}|(@KafkaListener|\.poll\()(?:.|\n){0,2500}?(Thread\.sleep|TimeUnit\.\w+\.sleep|time\.sleep)\(`
 
 ---
 
@@ -296,6 +362,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(Map|List|Set|Queue|AtomicLong|AtomicInteger)(<[^;]*>)?\s+\w+\s*=\s*new(?:.|\n){0,2500}?(@KafkaListener|\.poll\()`
+
+---
+
 Почему
 
 Усложняется горизонтальное масштабирование.
@@ -311,6 +383,12 @@ Consumer использует synchronized
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `@KafkaListener(?:.|\n){0,2500}?(synchronized\b|ReentrantLock|\.lock\(\))`
 
 ---
 
@@ -332,6 +410,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{java,kt,py,yml,yaml,properties}` :: `(@KafkaListener|\.poll\()(?:.|\n){0,2500}?(readTree|readValue|fromJson|json\.loads)\(|(value[._-]deserializer|VALUE_DESERIALIZER_CLASS_CONFIG)\W.*Json|kafka\.support\.serializer\.JsonDeserializer`
+
+---
+
 Почему
 
 Высокая CPU-нагрузка.
@@ -350,6 +434,12 @@ Low
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(@KafkaListener|\.poll\()(?:.|\n){0,2500}?(readValue|readTree|fromJson)\((?:.|\n){0,1000}?(readValue|readTree|fromJson)\(`
+
+---
+
 # KAFKA-036
 
 ## Название
@@ -359,6 +449,13 @@ Low
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt,py}` :: `@KafkaListener|KafkaConsumer<|new KafkaConsumer|AIOKafkaConsumer|\bConsumer\(\{`
+Нет: `DeadLetter|[dD]ead[-_.]?[lL]etter|DLQ|dlq|DLT|dlt|DefaultErrorHandler|CommonErrorHandler|SeekToCurrentErrorHandler|RetryableTopic`
 
 ---
 
@@ -378,6 +475,12 @@ Retry внутри Consumer
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt,py}` :: `(@KafkaListener|\.poll\()(?:.|\n){0,2500}?(@Retryable|RetryTemplate|retryTemplate|Retry\.|Thread\.sleep|time\.sleep|tenacity)|@Retryable(?:.|\n){0,300}?@KafkaListener|FixedBackOff\(|ExponentialBackOff\(`
 
 ---
 
@@ -422,6 +525,13 @@ Medium
 Severity
 
 High
+
+---
+
+### Grep
+
+`{pom.xml,build.gradle,build.gradle.kts}` :: `spring-kafka|kafka-clients|spring-cloud-stream-binder-kafka|reactor-kafka|kafka-streams`
+Нет: `micrometer|actuator|kafka-exporter|opentelemetry|jmx`
 
 ---
 

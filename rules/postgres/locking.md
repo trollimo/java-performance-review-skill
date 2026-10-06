@@ -24,6 +24,12 @@ Locking
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `@Transactional(\s*\([^)]*\))?\s*(\n\s*)?((public|open|internal|abstract)\s+)*(class|interface)\b`
+
+---
+
 ### Что искать
 
 - @Transactional вокруг большого объема кода
@@ -83,6 +89,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt,py}` :: `(?s)(@Transactional|session\.begin\(\)|\.begin\(\)).{0,2000}?(\b(restTemplate|webClient|restClient|httpClient|feignClient|\w+Client)\.\w+\(|\b(requests|httpx|aiohttp)\.\w+\()`
+
+---
+
 Почему
 
 Блокировки удерживаются во время сетевого ожидания.
@@ -101,6 +113,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(?s)@Transactional\b.{0,2000}?\b(kafkaTemplate|KafkaTemplate|producer|rabbitTemplate)\.(send|convertAndSend)\w*\(`
+
+---
+
 Исправление
 
 Outbox Pattern.
@@ -116,6 +134,12 @@ Batch Job одной транзакцией
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{java,kt}` :: `(?s)@Transactional\b.{0,1500}?(\bfor\s*\(|\.forEach\(|\bwhile\s*\(|saveAll\()`
 
 ---
 
@@ -145,6 +169,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bupdate\s+[\w."]+\s+set\b|@Modifying|\.bulk_update_mappings\(|\.update\(\s*\{`
+
+---
+
 Что искать
 
 UPDATE
@@ -171,6 +201,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bdelete\s+from\s+[\w."]+|\bdeleteAll(InBatch)?\(|\.query\([^)]*\)\.delete\(`
+
+---
+
 Почему
 
 Большое количество Dead Tuples.
@@ -192,6 +228,12 @@ Serializable Isolation без необходимости
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{java,kt,py,properties,yml,yaml,sql}` :: `(?i)Isolation\.SERIALIZABLE|isolation_level\s*=\s*["']SERIALIZABLE|transaction\s+isolation\s+level\s+serializable|\bserializable\b`
 
 ---
 
@@ -227,6 +269,12 @@ High
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)for\s+update|PESSIMISTIC_(WRITE|READ)|with_for_update\(|select_for_update\(`
+
+---
+
 Почему
 
 Увеличивает конкуренцию между транзакциями.
@@ -244,6 +292,12 @@ SELECT FOR UPDATE
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)@Lock\([^)]*\)[^;{]{0,300}\b(List|Collection|Set|Stream)<|\bin\s*\(\s*:\w+\s*\)[^;"]*for\s+update`
 
 ---
 
@@ -267,6 +321,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)for\s+update|PESSIMISTIC_(WRITE|READ)|with_for_update\(|select_for_update\(`
+
+---
+
 Почему
 
 Сначала выполняется Seq Scan,
@@ -284,6 +344,13 @@ Idle in Transaction
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{properties,yml,yaml,conf,sql,java,kt,py}` :: `(?i)setAutoCommit\(\s*false\s*\)|auto-?commit\s*[=:]\s*false|autocommit\s*=\s*False|create_(async_)?engine\(|jdbc:postgresql://`
+Нет: `(?i)idle_in_transaction_session_timeout`
 
 ---
 
@@ -312,6 +379,12 @@ MVCC деградирует.
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\b\w*(count|counter|balance|total|seq|views|likes|stock|quantity|amount|number)\w*\s*=\s*\w*(count|counter|balance|total|seq|views|likes|stock|quantity|amount|number)\w*\s*[+-]`
 
 ---
 
@@ -346,6 +419,12 @@ Hot Row
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\b\w*(count|counter|balance|total|seq|views|likes|stock|quantity|amount|number)\w*\s*=\s*\w*(count|counter|balance|total|seq|views|likes|stock|quantity|amount|number)\w*\s*[+-]`
 
 ---
 
@@ -405,6 +484,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{conf,yml,yaml,env,properties,sql}` :: `(?i)\bautovacuum\w*\s*[=:]\s*\S+|autovacuum_enabled`
+
+---
+
 Последствия
 
 Рост размера таблиц
@@ -437,6 +522,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bupdate\s+[\w."]+\s+set\b([\s,]*[\w."]+\s*=\s*(\?|:\w+|%s|#\{[^}]+\}|\$\d+)){5,}`
+
+---
+
 Почему
 
 Создается новая версия строки,
@@ -463,6 +554,12 @@ High
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)jsonb_set\(|\bset\s+\w+\s*=\s*[^,;"]*::jsonb|\bset\s+\w*(json|payload|data|attributes|metadata|properties)\w*\s*=`
+
+---
+
 Почему
 
 Перезаписывается практически весь объект.
@@ -478,6 +575,12 @@ High
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bon\s+conflict\b|\bon\s+duplicate\s+key|\.on_conflict_do_(update|nothing)\(|\bsaveAll\(`
 
 ---
 
@@ -511,6 +614,13 @@ High
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bfor\s+update\b|\block\s+table\b|\balter\s+table\b[^;]*\b(add\s+(constraint|foreign)|set\s+not\s+null|alter\s+column\s+\w+\s+(set\s+data\s+)?type)`
+Нет: `(?i)lock_timeout|lock\.timeout|LockTimeout`
+
+---
+
 Почему
 
 Транзакции могут ждать бесконечно.
@@ -534,6 +644,13 @@ lock_timeout.
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{yml,yaml,properties,env,java,kt,py,conf}` :: `(?i)jdbc:postgresql://|postgres(ql)?(\+\w+)?://|create_(async_)?engine\(`
+Нет: `(?i)statement_timeout|socketTimeout|query_timeout|queryTimeout|command_timeout|connect_args`
 
 ---
 
@@ -634,6 +751,12 @@ High
 
 ---
 
+### Grep
+
+`*.{java,kt}` :: `(?s)@Transactional\b.{0,1500}?(\bfor\s*\(|\.forEach\(|\bwhile\s*\(|saveAll\()`
+
+---
+
 Почему
 
 Чем больше транзакция,
@@ -651,6 +774,12 @@ High
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{java,kt,py}` :: `REQUIRES_NEW|\b(for|while)\b[^\n]{0,100}\.commit\(|\bfor\b[^\n]*:[ \t]*\n([^\n]*\n){0,4}?[ \t]*\w+\.commit\(\)`
 
 ---
 

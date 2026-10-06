@@ -28,6 +28,12 @@ Event Loop
 
 ---
 
+### Grep
+
+`*.py` :: `time\.sleep\(|requests\.\w+\(|subprocess\.(run|call|check_output)\(|psycopg2|sqlite3\.connect\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -116,6 +122,12 @@ Event Loop
 
 ---
 
+### Grep
+
+`*.py` :: `argon2|bcrypt|scrypt|pbkdf2|swisseph|\.(hash|verify)\(\w*pass|pd\.read_|cv2\.|Image\.open\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -198,6 +210,12 @@ Medium
 Category
 
 Concurrency
+
+---
+
+### Grep
+
+`*.py` :: `(?m)^\s*\w+ = await .+\n\s*\w+ = await `
 
 ---
 
@@ -295,6 +313,12 @@ Concurrency
 
 ---
 
+### Grep
+
+`*.py` :: `gather\(\*`
+
+---
+
 ### Что искать
 
 ```python
@@ -386,6 +410,12 @@ Tasks
 
 ---
 
+### Grep
+
+`*.py` :: `^\s*(asyncio\.)?(create_task|ensure_future)\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -467,6 +497,12 @@ High
 Category
 
 IO
+
+---
+
+### Grep
+
+`*.py` :: `httpx\.AsyncClient\(|aiohttp\.ClientSession\(`
 
 ---
 
@@ -563,6 +599,12 @@ Resilience
 
 ---
 
+### Grep
+
+`*.py` :: `httpx\.\w+\(|aiohttp\.ClientSession\(|ClientTimeout|requests\.\w+\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -642,6 +684,12 @@ Medium
 Category
 
 Event Loop
+
+---
+
+### Grep
+
+`*.py` :: `asyncio\.run\(|run_until_complete\(`
 
 ---
 
@@ -729,6 +777,12 @@ Framework
 
 ---
 
+### Grep
+
+`*.py` :: `run_in_threadpool|^\s*def \w+\(.*(Depends|Request)|@(app|router)\.(get|post|put|delete)`
+
+---
+
 ### Что искать
 
 ```python
@@ -809,6 +863,12 @@ High
 Category
 
 Memory
+
+---
+
+### Grep
+
+`*.py` :: `asyncio\.Queue\(\)|Queue\(maxsize=0\)`
 
 ---
 
@@ -899,6 +959,12 @@ Memory
 
 ---
 
+### Grep
+
+`*.py` :: `await \w+\.(json|text|read)\(\)|\.content\b|\.read\(\)`
+
+---
+
 ### Что искать
 
 ```python
@@ -981,6 +1047,12 @@ Resources
 
 ---
 
+### Grep
+
+`*.py` :: `create_async_engine\(|pool_size|max_overflow|TCPConnector\(|httpx\.Limits|create_pool\(|Semaphore\(`
+
+---
+
 ### Что искать
 
 ```python
@@ -1056,6 +1128,12 @@ Medium
 Category
 
 Concurrency
+
+---
+
+### Grep
+
+`*.py` :: `asyncio\.Lock\(\)`
 
 ---
 
@@ -1135,6 +1213,12 @@ High
 Category
 
 Tasks
+
+---
+
+### Grep
+
+`*.py` :: `except (BaseException|asyncio\.CancelledError)|^\s*except\s*:`
 
 ---
 
@@ -1230,6 +1314,12 @@ Medium
 Category
 
 Scalability
+
+---
+
+### Grep
+
+`*.py` :: `uvicorn|gunicorn|--workers|workers=`
 
 ---
 

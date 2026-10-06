@@ -24,6 +24,12 @@ Execution Plan
 
 ---
 
+### Grep
+
+`*.{sql,md,txt,log,json,java,kt,py}` :: `(?i)\bseq\s+scan\b|\bseq_scan\b|enable_seqscan`
+
+---
+
 ### Что искать
 
 EXPLAIN
@@ -79,6 +85,12 @@ Critical
 
 ---
 
+### Grep
+
+`*.{sql,md,txt,log,json,java,kt,py}` :: `(?i)\bseq\s+scan\b|\bseq_scan\b|enable_seqscan`
+
+---
+
 Что искать
 
 Seq Scan
@@ -113,6 +125,13 @@ Critical
 
 ---
 
+### Grep
+
+`*.{sql,xml,py}` :: `(?i)\breferences\s+[\w."]+\s*\(|<addForeignKeyConstraint|ForeignKey(Constraint)?\(|create_foreign_key\(`
+Нет: `(?i)create\s+(unique\s+)?index|<createIndex|create_index\(|index\s*=\s*True|\bIndex\(`
+
+---
+
 Что искать
 
 WHERE
@@ -140,6 +159,12 @@ WHERE
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bcreate\s+(unique\s+)?index\b[^;]*\(\s*\w+\s*,\s*\w+|columnList\s*=\s*"\w+\s*,|create_index\([^)]*\[\s*["']\w+["']\s*,`
 
 ---
 
@@ -177,6 +202,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bcreate\s+(unique\s+)?index\b[^;\n]*\(([^,)\n]+,){3,}`
+
+---
+
 Почему
 
 Большой индекс
@@ -196,6 +227,12 @@ Medium
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bcreate\s+(unique\s+)?index\b|\bcreate_index\(|<createIndex\b`
 
 ---
 
@@ -222,6 +259,13 @@ Medium
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{sql,xml,py}` :: `(?i)\bcreate\s+(unique\s+)?index\b|\bcreate_index\(|<createIndex\b`
+Нет: `(?i)\binclude\s*\(|postgresql_include`
 
 ---
 
@@ -255,6 +299,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,md,txt,log,json}` :: `(?i)index\s+only\s+scan|\bheap\s+fetches`
+
+---
+
 Почему
 
 Запрашиваются поля,
@@ -277,6 +327,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,md,txt,log,json}` :: `(?i)bitmap\s+(heap\s+)?scan|enable_bitmapscan`
+
+---
+
 Почему
 
 Часто означает,
@@ -296,6 +352,12 @@ Nested Loop
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{sql,md,txt,log,json}` :: `Nested Loop|enable_nestloop`
 
 ---
 
@@ -337,6 +399,12 @@ High
 
 ---
 
+### Grep
+
+`*.{sql,md,txt,log,json,conf,yml,yaml,properties}` :: `(?i)hash\s+join|hash_mem_multiplier|Batches:\s*[2-9]|\bwork_mem\b`
+
+---
+
 Почему
 
 Появляются Batch Hash Join
@@ -354,6 +422,12 @@ Sort Spill
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{sql,md,txt,log,json,conf,yml,yaml,properties}` :: `(?i)sort\s+method:\s*external|\bwork_mem\b|log_temp_files|temp_file_limit`
 
 ---
 
@@ -385,6 +459,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,md,txt,log,json}` :: `\bMaterialize\s+\(cost=`
+
+---
+
 Почему
 
 Дополнительная память.
@@ -400,6 +480,12 @@ Rows Removed by Filter
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{sql,md,txt,log,json}` :: `Rows Removed by Filter`
 
 ---
 
@@ -423,6 +509,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,md,txt,log,json}` :: `Heap Fetches:\s*[1-9]`
+
+---
+
 Почему
 
 Недостаточно покрывающий индекс.
@@ -438,6 +530,12 @@ Medium
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bcreate\s+index\b[^;\n]*\(\s*(is_|has_)?\w*(active|deleted|enabled|archived|processed|status|flag)\w*\s*\)|Boolean\b[^\n]*index\s*=\s*True`
 
 ---
 
@@ -462,6 +560,12 @@ Medium
 Severity
 
 Critical
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\b(where|and|or)\s+(lower|upper|date|cast|coalesce|substring|substr|trim|to_char|date_trunc|extract)\s*\(\s*[\w.]|\.(filter|where)\(\s*func\.(lower|upper|date|substr|trim|date_trunc|coalesce)\(`
 
 ---
 
@@ -490,6 +594,12 @@ COALESCE()
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\b(status|state)\s*=\s*'(ACTIVE|NEW|PENDING|CREATED|OPEN|WAITING|PROCESSING)'`
 
 ---
 
@@ -523,6 +633,13 @@ High
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bilike\b|\blike\s+['"]%|->>|@>|to_tsvector`
+Нет: `(?i)using\s+(gin|gist)|gin_trgm_ops|postgresql_using\s*=\s*["']gin`
+
+---
+
 Что искать
 
 LIKE
@@ -548,6 +665,13 @@ BRIN не используется
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{sql,xml,py}` :: `(?i)create\s+table\s+(if\s+not\s+exists\s+)?[\w."]*(event|log|audit|history|telemetry|metric|measure)\w*|create_table\(\s*["']\w*(event|log|audit|history|telemetry|metric)`
+Нет: `(?i)using\s+brin|postgresql_using\s*=\s*["']brin`
 
 ---
 
@@ -599,6 +723,12 @@ High
 
 ---
 
+### Grep
+
+`*.{conf,yml,yaml,env,properties,sql}` :: `(?i)\bautovacuum\w*\s*[=:]\s*\S+|autovacuum_enabled`
+
+---
+
 Признаки
 
 Большое количество Dead Tuples
@@ -619,6 +749,12 @@ Medium
 
 ---
 
+### Grep
+
+`*.{sql,java,kt,py,xml,md,conf}` :: `(?i)\breindex\b|pgstatindex|index_bloat|\bbloat\b`
+
+---
+
 Почему
 
 Размер индекса
@@ -636,6 +772,12 @@ Table Bloat
 Severity
 
 High
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml,md,conf}` :: `(?i)\bvacuum\s+full\b|pg_repack|pgstattuple|table_bloat`
 
 ---
 
@@ -676,6 +818,12 @@ Medium
 Severity
 
 Medium
+
+---
+
+### Grep
+
+`*.{sql,java,kt,py,xml}` :: `(?i)\bcreate\s+(unique\s+)?index\b|\bcreate_index\(|<createIndex\b`
 
 ---
 
