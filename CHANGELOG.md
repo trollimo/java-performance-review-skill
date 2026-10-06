@@ -23,8 +23,11 @@
 - `### Grep` hints for most old rules (Java, Hibernate, jOOQ, Kafka, Liquibase, PostgreSQL, SQL, Spring, architecture).
 - New rule sets: nginx (NGX-001 ... 022), docker (DKR-001 ... 017), REST/HTTP (HTTP-001 ... 012), general cross-cutting performance (GEN-001 ... 025), redis (RDS-001 ... 013), migrations (MIG-001 ... 012).
 
+- HTML report: static "Как считается оценка" block at the end (formula, Severity/Confidence/Escalation/Grade tables, what escalation means); the score cards, the marker and the formula note link to it. The same table and escalation explanation are in `README.md`.
+
 ### Changed
 
+- Escalation weights: `hot` +3 (was +2), `scheduler` +2 (was +3); a hot path hits every user, a scheduler runs off the user path. Scores of reports built with the old weights are not comparable.
 - `scoring.md` 1.1: the total is the sum of per-finding points; Architecture/Scalability/Database/JVM/Kubernetes tables are a breakdown, not addends (no double counting).
 - Analysis modes in `SKILL.md`: "Java Review" became "Language Review" (Java, Kotlin, Python) and "Spring Review" became "Framework Review" (Spring, Django), keeping the limit of 8 modes.
 - Manual checks extended with JFR, py-spy, cProfile, tracemalloc, Django Debug Toolbar and Celery monitoring.

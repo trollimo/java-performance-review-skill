@@ -147,3 +147,13 @@ details.rule-pop[open] > summary { background: #1d4ed8; color: #fff; }
 .rule-card .rc-src { margin-top: 0.5rem; font-size: 0.75rem; color: var(--color-text-secondary); }
 .breakdown td.num, .breakdown th.num { text-align: right; font-variant-numeric: tabular-nums; }
 .finding-header .pts { margin-left: auto; font-size: 0.75rem; color: var(--color-text-secondary); }
+
+/* методика оценки */
+a.score-link { color: inherit; text-decoration: none; cursor: pointer; }
+a.metric-card.score-link:hover { box-shadow: 0 0 0 2px var(--color-primary); }
+.scale-marker a.score-link span { cursor: pointer; }
+.scale-note a { color: inherit; text-decoration: underline dotted; }
+html { scroll-behavior: smooth; }
+#scoring-method:target { box-shadow: 0 0 0 2px var(--color-primary); }
+.formula { font-size: 1.05rem; font-weight: 600; }
+.method-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }

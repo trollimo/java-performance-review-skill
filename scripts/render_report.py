@@ -38,7 +38,7 @@ from build_index import HEAD  # noqa: E402
 SEV = ["Critical", "High", "Medium", "Low", "Info"]
 SEV_POINTS = {"Critical": 10, "High": 6, "Medium": 3, "Low": 1, "Info": 0}
 CONF_MULT = {"High": 1.0, "Medium": 0.7, "Low": 0.4}
-ESCALATION = {"hot": 2, "scheduler": 3, "system": 5}
+ESCALATION = {"hot": 3, "scheduler": 2, "system": 5}
 IMPROVEMENT_RANK = {"Very High": 0, "High": 1, "Medium": 2, "Low": 3, "Unknown": 4}
 CATEGORIES = [("architecture", "Architecture"), ("database", "Database"), ("scalability", "Scalability"), ("other", "Прочее")]
 SEV_ICON = {"Critical": "🚨", "High": "⚠️", "Medium": "🔶", "Low": "🔹", "Info": "ℹ️"}
@@ -170,10 +170,10 @@ def scale_html(score):
             pos = (i + frac) / len(GRADES) * 100
             break
     return (f'<div class="scale"><div class="scale-bar">{"".join(segs)}'
-            f'<div class="scale-marker" style="left:{pos:.1f}%"><span>{score:g}</span></div></div>'
+            f'<div class="scale-marker" style="left:{pos:.1f}%"><a class="score-link" href="#scoring-method" title="Как считается оценка"><span>{score:g}</span></a></div></div>'
             f'<div class="scale-legend">{"".join(legend)}</div>'
             f'<div class="scale-note">Шкала риска: 0 — проблем нет, выше 120 — критический риск. '
-            f'Чем левее маркер, тем лучше. Оценка = сумма баллов находок: Severity × Confidence + эскалация.</div></div>')
+            f'Чем левее маркер, тем лучше. <a href="#scoring-method">Оценка = сумма баллов находок: Severity × Confidence + эскалация</a>.</div></div>')
 
 
 def finding_html(f, cards):
@@ -212,6 +212,36 @@ def finding_html(f, cards):
             f'<div class="finding-body">{"".join(rows)}</div></div>')
 
 
+def method_html():
+    sev = "".join(f'<tr><td>{s}</td><td class="num">{SEV_POINTS[s]}</td></tr>' for s in SEV)
+    conf = "".join(f'<tr><td>{k}</td><td class="num">{v:g}</td></tr>' for k, v in CONF_MULT.items())
+    esc_rows = {
+        "hot": ("цикл, горячий путь, код каждого запроса", "синхронный Argon2 в обработчике входа"),
+        "scheduler": ("scheduler или batch на тысячи записей", "миграция или ночная задача с построчным UPDATE"),
+        "system": ("затрагивает всю систему, а не один запрос", "один процесс uvicorn, общий пул соединений"),
+    }
+    esc_t = "".join(f'<tr><td>{k}</td><td>{esc_rows[k][0]}</td><td>{esc_rows[k][1]}</td><td class="num">+{v}</td></tr>' for k, v in ESCALATION.items())
+    gr = "".join(f'<tr><td><b>{l}</b></td><td>{lo}–{hi}</td><td>{n}</td></tr>' if hi is not None else f'<tr><td><b>{l}</b></td><td>&gt;{lo - 1}</td><td>{n}</td></tr>'
+                 for l, lo, hi, n in GRADES)
+    return ('<section id="scoring-method"><h2>🧮 Как считается оценка</h2><div class="section-body">'
+            '<p class="formula">Баллы находки = вес Severity × коэффициент Confidence + эскалация.<br>'
+            'Оценка отчёта = сумма баллов всех находок. Info баллов не даёт.</p>'
+            '<div class="method-grid">'
+            f'<div><h3>Вес Severity</h3><table class="breakdown"><thead><tr><th>Severity</th><th class="num">Вес</th></tr></thead><tbody>{sev}</tbody></table></div>'
+            f'<div><h3>Confidence</h3><table class="breakdown"><thead><tr><th>Уверенность</th><th class="num">Коэффициент</th></tr></thead><tbody>{conf}</tbody></table>'
+            '<p class="scale-note">Насколько находка подтверждена кодом.</p></div>'
+            f'<div><h3>Оценка (Grade)</h3><table class="breakdown"><thead><tr><th>Grade</th><th>Баллы</th><th>Риск</th></tr></thead><tbody>{gr}</tbody></table></div>'
+            '</div>'
+            f'<h3>Эскалация</h3><table class="breakdown"><thead><tr><th>Значение</th><th>Когда</th><th>Пример</th><th class="num">Добавка</th></tr></thead><tbody>{esc_t}</tbody></table>'
+            '<p class="scale-note">Эскалация — надбавка за то, где живёт проблема. Один и тот же дефект в редком админ-эндпоинте и в коде каждого запроса стоит по-разному: '
+            'чем чаще и шире выполняется код, тем сильнее он бьёт по системе. Ревьюер выбирает одно значение для находки (они не суммируются); '
+            'если ни одно не подходит, надбавка 0.</p>'
+            '<p class="scale-note">Пример: High (6) × Medium (0.7) = 4.2, плюс hot (+3) = 7.2. '
+            'Таблицы по областям (Architecture, Database, …) разбивают ту же сумму и повторно не складываются. '
+            'Оценка зависит от полноты ревью: сравнивать отчёты «до/после» корректно при одинаковой глубине анализа.</p>'
+            '</div></section>')
+
+
 def render(data, cards):
     findings = [f for f in data.get("findings", []) if f.get("severity") in SEV]
     for f in findings:
@@ -235,8 +265,8 @@ def render(data, cards):
     parts = []
     cards_html = "".join(f'<div class="metric-card {s.lower()}"><div class="value">{counts[s]}</div><div class="label">{s}</div></div>' for s in SEV)
     parts.append(f'<section id="executive-summary"><h2>📊 Executive Summary</h2><div class="section-body"><div class="dashboard">'
-                 f'<div class="metric-card grade-{letter.lower()}"><div class="value">{letter}</div><div class="label">Performance Grade · {risk_name}</div></div>'
-                 f'<div class="metric-card"><div class="value">{score:g}</div><div class="label">Performance Risk</div></div>{cards_html}</div>'
+                 f'<a class="metric-card grade-{letter.lower()} score-link" href="#scoring-method" title="Как считается оценка"><div class="value">{letter}</div><div class="label">Performance Grade · {risk_name}</div></a>'
+                 f'<a class="metric-card score-link" href="#scoring-method" title="Как считается оценка"><div class="value">{score:g}</div><div class="label">Performance Risk</div></a>{cards_html}</div>'
                  f'{scale_html(score)}<p style="margin-top:1rem">{rich(data.get("summary", ""))}</p></div></section>')
 
     ov = data.get("overview") or {}
@@ -263,7 +293,7 @@ def render(data, cards):
                  f'<tbody>{sev_rows}<tr><td><b>Итого</b></td><td class="num">{len(findings)}</td><td></td><td class="num"><b>{score:g}</b></td></tr></tbody></table>'
                  f'<h3>Разрез по областям</h3><table class="breakdown"><thead><tr><th>Область</th><th class="num">Баллы</th></tr></thead><tbody>{cat_rows}</tbody></table>'
                  f'<p class="scale-note">Баллы находки = вес Severity × коэффициент Confidence (High 1.0, Medium 0.7, Low 0.4) + эскалация '
-                 f'(горячий путь +2, scheduler/batch +3, вся система +5). Info не даёт баллов. Области — разрез тех же баллов, повторно они не суммируются.</p>'
+                 f'(горячий путь +3, scheduler/batch +2, вся система +5). Info не даёт баллов. Области — разрез тех же баллов, повторно они не суммируются.</p>'
                  f'</div></section>')
 
     for s in SEV:
@@ -298,6 +328,9 @@ def render(data, cards):
     parts.append(f'<section id="final-conclusion"><h2>🏁 Final Conclusion</h2><div class="section-body"><div class="conclusion"><div class="verdict {verdict_cls}">{esc(verdict)}</div>'
                  f'<p>Grade {letter} · Risk {score:g} · Critical {counts["Critical"]} · High {counts["High"]} · Medium {counts["Medium"]} · Low {counts["Low"]} · Info {counts["Info"]}</p>'
                  f'<p>{rich(data.get("conclusion", ""))}</p></div></div></section>')
+
+    sections.append(("scoring-method", "🧮 Как считается оценка"))
+    parts.append(method_html())
 
     toc = "".join(f'<li><a href="#{i}">{t}</a></li>' for i, t in sections)
     meta = " · ".join(esc(x) for x in (data.get("repo"), data.get("mode"), data.get("date"),

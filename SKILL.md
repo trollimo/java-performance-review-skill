@@ -493,7 +493,7 @@ Script mode (по умолчанию): записать находки в JSON �
   `confidence` (High|Medium|Low), `tech`, `category` (database|architecture|scalability|other), `component`,
   `location` (`путь:строка`), `problem`, `impact`[], `explanation`, `evidence` {`lang`,`code`}, `recommendation`,
   `improvement` (Very High|High|Medium|Low|Unknown), `related`[] (ID правил), `escalation` (hot|scheduler|system)
-- `escalation`: `hot` — цикл, горячий путь, каждый HTTP-запрос (+2); `scheduler` — scheduler или batch на тысячи записей (+3);
+- `escalation`: `hot` — цикл, горячий путь, каждый HTTP-запрос (+3); `scheduler` — scheduler или batch на тысячи записей (+2);
   `system` — затрагивает всю систему (+5)
 - в тексте `код` в обратных кавычках превращается в `<code>`
 

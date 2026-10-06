@@ -113,6 +113,37 @@ Analyze this repository using this Skill and identify real and potential perform
 
 ---
 
+## 🧮 Scoring
+
+Points of a finding = Severity weight × Confidence multiplier + escalation. The report score is the sum over all findings (Info gives 0). The HTML report repeats this table at the bottom; the score and the formula in the report link to it.
+
+| Severity | Weight | | Confidence | Multiplier | | Escalation | Add |
+|---|---|---|---|---|---|---|---|
+| Critical | 10 | | High | 1.0 | | `hot` | +3 |
+| High | 6 | | Medium | 0.7 | | `scheduler` | +2 |
+| Medium | 3 | | Low | 0.4 | | `system` | +5 |
+| Low | 1 | | | | | | |
+| Info | 0 | | | | | | |
+
+**Escalation** is a surcharge for where the problem lives: the more often and the wider the code runs, the more it costs. One value per finding, values do not add up; if none fits, the surcharge is 0.
+
+- `hot` - a loop, a hot path, code of every request (e.g. synchronous Argon2 in a login handler).
+- `scheduler` - a scheduler or a batch over thousands of records (e.g. a migration with a row-by-row UPDATE).
+- `system` - affects the whole system, not one request (e.g. a single uvicorn process, a shared connection pool).
+
+| Grade | Score | Risk |
+|---|---|---|
+| A | 0-15 | Excellent |
+| B | 16-30 | Good |
+| C | 31-50 | Moderate |
+| D | 51-80 | High |
+| E | 81-120 | Very High |
+| F | >120 | Critical |
+
+Example: High (6) × Medium (0.7) = 4.2, plus `hot` (+3) = 7.2. Per-area tables (Architecture, Database, ...) split the same sum and are not added again. Compare "before/after" reports only at the same review depth: the score depends on how many findings the reviewer found.
+
+---
+
 ## 📌 Status
 
 **Version 1.1**
