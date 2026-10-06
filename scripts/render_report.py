@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Собирает HTML-отчёт из JSON с находками. Шаблон и скоринг в контекст модели не попадают.
 
-    python3 scripts/render_report.py findings.json report.html [--rules-dir rules]
+    python3 scripts/render_report.py findings.json report.html [--repo ПУТЬ] [--rules-dir rules]
     python3 scripts/render_report.py --example      # печатает пример входного JSON
 
-Вход (все поля, кроме id/severity/problem у находки, необязательны):
+Находка Critical-Low без `location` (путь:строка), `evidence.code` или с Confidence Low отклоняется: отчёт не собирается.
+С `--repo` дополнительно проверяется, что файл существует, строка в его пределах, а фрагмент evidence есть в файле.
+
+Вход (обязательны id/severity/problem, для Critical-Low ещё location и evidence.code):
 {
   "title": "...", "repo": "...", "date": "2026-10-06", "mode": "Full Performance Review",
   "engine": "script" | "manual",
@@ -63,6 +66,7 @@ EXAMPLE = {
          "escalation": "hot"},
         {"id": "NGX-001", "severity": "Medium", "confidence": "High", "tech": "nginx", "category": "other",
          "location": "infrastructure/nginx/nginx.conf:9", "problem": "Нет `gzip on`.",
+         "evidence": {"lang": "nginx", "code": "http {\n    sendfile on;\n}"},
          "recommendation": "Включить gzip для text/json.", "improvement": "Medium"}],
     "positives": ["Пул соединений настроен явно."], "manual_review": ["Нагрузочный профиль не известен."],
 }
@@ -347,6 +351,39 @@ def render(data, cards):
             f'document.querySelectorAll("details.rule-pop[open]").forEach(function(x){{if(x!==d)x.open=false}})}});</script></body></html>')
 
 
+LOC = re.compile(r"^\s*\.?/?([^\s:,]+):(\d+)")
+
+
+def validate(data, repo=None):
+    """Находка допускается в отчёт только с прочитанным кодом: location, evidence.code, Confidence не Low."""
+    errors, warnings = [], []
+    for f in data.get("findings", []):
+        if f.get("severity") not in SEV or f.get("severity") == "Info":
+            continue
+        fid = f.get("id") or f.get("title") or "?"
+        m = LOC.match(f.get("location") or "")
+        code = ((f.get("evidence") or {}).get("code") or "").strip()
+        if not m:
+            errors.append(f"{fid}: нет location вида путь:строка")
+        if not code:
+            errors.append(f"{fid}: нет evidence.code (фрагмент прочитанного кода)")
+        if f.get("confidence") == "Low":
+            errors.append(f"{fid}: Confidence Low не допускается в находках, перенесите в manual_review")
+        if m and repo:
+            path = Path(repo) / m.group(1)
+            if not path.is_file():
+                errors.append(f"{fid}: файл {m.group(1)} не найден в репозитории")
+            else:
+                text = path.read_text(encoding="utf-8", errors="ignore")
+                if int(m.group(2)) > text.count("\n") + 1:
+                    errors.append(f"{fid}: строка {m.group(2)} за пределами файла {m.group(1)}")
+                elif code:
+                    first = next((ln.strip() for ln in code.splitlines() if len(ln.strip()) > 3 and "..." not in ln), "")
+                    if first and first not in text:
+                        warnings.append(f"{fid}: фрагмент evidence не найден в {m.group(1)} дословно")
+    return errors, warnings
+
+
 def main():
     argv = sys.argv[1:]
     if "--example" in argv:
@@ -357,9 +394,22 @@ def main():
         k = argv.index("--rules-dir")
         rules_dir = Path(argv[k + 1])
         del argv[k:k + 2]
+    repo = None
+    if "--repo" in argv:
+        k = argv.index("--repo")
+        repo = argv[k + 1]
+        del argv[k:k + 2]
     if len(argv) != 2:
         sys.exit(__doc__)
     data = json.loads(Path(argv[0]).read_text(encoding="utf-8"))
+    errors, warnings = validate(data, repo)
+    for w in warnings:
+        print(f"ПРЕДУПРЕЖДЕНИЕ {w}", file=sys.stderr)
+    if errors:
+        print("Отчёт не собран: в него попадают только находки, подтверждённые прочитанным кодом.", file=sys.stderr)
+        for e in errors:
+            print(f"  ОШИБКА {e}", file=sys.stderr)
+        sys.exit(1)
     out = Path(argv[1])
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(render(data, load_rules(rules_dir)), encoding="utf-8")

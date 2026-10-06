@@ -27,6 +27,7 @@
 
 ### Changed
 
+- Only code-confirmed findings: `render_report.py` refuses to build a report when a Critical-Low finding has no `location` (path:line) or `evidence.code`, or has Confidence Low; with `--repo` it also checks that the file exists, the line is in range and the evidence snippet is in the file. `SKILL.md` says a scanner hit is a candidate, not a finding; unconfirmed items go to `manual_review`.
 - Escalation weights: `hot` +3 (was +2), `scheduler` +2 (was +3); a hot path hits every user, a scheduler runs off the user path. Scores of reports built with the old weights are not comparable.
 - `scoring.md` 1.1: the total is the sum of per-finding points; Architecture/Scalability/Database/JVM/Kubernetes tables are a breakdown, not addends (no double counting).
 - Analysis modes in `SKILL.md`: "Java Review" became "Language Review" (Java, Kotlin, Python) and "Spring Review" became "Framework Review" (Spring, Django), keeping the limit of 8 modes.

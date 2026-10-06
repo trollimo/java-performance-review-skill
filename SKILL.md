@@ -249,6 +249,8 @@ Manual mode: все шаги выполняет агент вручную.
    (design-правила вроде ARCH-* и SQL-*, сработавшие на общих словах, чаще всего оказываются ложными). Для кандидатов прочитать блок правила по номерам строк из вывода
    (`Read <файл> offset=<start> limit=<end-start+1>`) и проверить код. Пометка «шумно» означает много файлов:
    проверять выборочно.
+   В отчёт попадает только находка, подтверждённая прочитанным кодом: `location` (`путь:строка`) и `evidence.code` с фрагментом из файла.
+   Совпадение сканера без прочитанного кода, догадка и «возможно» не находка: такое пишется в `manual_review`.
 4. Правила из списка «без grep-подсказки» в конце вывода применять по названию,
    если соответствующий код встретился при чтении репозитория.
 5. Отсутствие совпадения не доказывает отсутствие проблемы: для design-правил (архитектура, масштабирование)
@@ -480,21 +482,23 @@ Script mode (по умолчанию): записать находки в JSON �
 Шаблон `report-template.html` и `scoring.md` НЕ читать: Score, Grade, шкала, Fix Order и карточки правил считаются в коде.
 
 1. Записать `findings.json` (во временный каталог, не в репозиторий) по схеме ниже.
-2. `python3 <каталог скилла>/scripts/render_report.py findings.json <путь>/report.html`
+2. `python3 <каталог скилла>/scripts/render_report.py findings.json <путь>/report.html --repo <путь к репозиторию>`
    Скрипт печатает число находок, Score и Grade. Они попадают в итоговое сообщение пользователю как есть, пересчитывать не нужно.
 3. Не писать HTML вручную.
 
-Схема JSON (поля, кроме `id`, `severity`, `problem`, необязательны; `python3 scripts/render_report.py --example` печатает пример)
+Схема JSON (поля, кроме `id`, `severity`, `problem`, `location`, `evidence`, необязательны; `python3 scripts/render_report.py --example` печатает пример)
 
 - верхний уровень: `title`, `repo`, `date`, `mode`, `engine` (`script`|`manual`), `summary`, `conclusion`,
   `overview` {`stack`, `architecture`, `components`[{`name`,`type`,`tech`,`desc`}]},
   `findings`, `positives`[], `manual_review`[], `insufficient` (true, если архитектуру определить нельзя)
 - находка: `id` (ID правила; кликабельный в отчёте), `title`, `severity` (Critical|High|Medium|Low|Info),
   `confidence` (High|Medium|Low), `tech`, `category` (database|architecture|scalability|other), `component`,
-  `location` (`путь:строка`), `problem`, `impact`[], `explanation`, `evidence` {`lang`,`code`}, `recommendation`,
+  `location` (`путь:строка`, обязательно), `problem`, `impact`[], `explanation`, `evidence` {`lang`,`code`} (обязательно: дословный фрагмент прочитанного кода), `recommendation`,
   `improvement` (Very High|High|Medium|Low|Unknown), `related`[] (ID правил), `escalation` (hot|scheduler|system)
 - `escalation`: `hot` — цикл, горячий путь, каждый HTTP-запрос (+3); `scheduler` — scheduler или batch на тысячи записей (+2);
   `system` — затрагивает всю систему (+5)
+- Confidence: High — код прочитан, влияние очевидно; Medium — код прочитан, влияние не измерено; Low в находках не используется (идёт в `manual_review`)
+- `render_report.py` отклоняет находки Critical-Low без `location`/`evidence.code` или с Confidence Low; запускать с `--repo <путь к репозиторию>`: он проверит, что файл и строка существуют, а фрагмент есть в файле
 - в тексте `код` в обратных кавычках превращается в `<code>`
 
 Manual mode: использовать шаблон `report-template.html` как основу (читать только если выбран HTML)

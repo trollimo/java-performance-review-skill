@@ -173,7 +173,8 @@ def main():
     fired.sort(key=lambda x: (SEV_ORDER.get(x[0]["sev"], 9), -len(x[1]), x[0]["id"]))
     print(f"# Сработало правил: {len(fired)} из {len(compiled)} с подсказкой; файлов в репозитории: {len(files)}")
     print(f"# Технологии: {', '.join(sorted(allowed))}" + (f"; пропущены без признаков: {', '.join(skipped_techs)}" if skipped_techs and not techs else ""))
-    print("# Совпадение = кандидат. Читать блок правила: Read <путь> offset=<start> limit=<end-start+1>\n")
+    print("# Совпадение = кандидат, не находка: в отчёт попадает только то, что подтверждено прочитанным кодом (location + evidence)")
+    print("# Читать блок правила: Read <путь> offset=<start> limit=<end-start+1>\n")
     for r, hs in fired:
         noisy = "  [шумно: много файлов, проверять выборочно]" if len(hs) > NOISY_FILES else ""
         locs = ", ".join(f"{f}:{ln}" for f, ln in hs[:max_loc])

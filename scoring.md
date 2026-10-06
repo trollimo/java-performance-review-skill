@@ -65,7 +65,7 @@ Confidence High
 
 Critical
 
-Confidence Low
+Confidence Low (в находки не допускается; значение оставлено для Manual mode)
 
 10 × 0.4 = 4
 
