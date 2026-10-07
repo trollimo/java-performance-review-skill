@@ -17,6 +17,7 @@
 - Coverage section in the HTML report.
 - Scanner skips `.md`/`.rst` files and `docs/`.
 - Windows support: no dependency on SIGALRM (rule timeouts via a spawn process pool, also `--pool`), UTF-8 output, `scan.py --out FILE`, BOM-tolerant JSON, backslash/absolute paths normalised in `location` and `coverage`.
+- HTML report is fully offline: highlight.js from cdnjs removed (it blocked rendering in closed networks); code is highlighted at render time by a built-in highlighter, no `<script src>`/`<link href>`; `report-template.html` cleaned the same way.
 - Report file name `performance-review_<service>_<version>[_diff].html`; service and version detected from manifests (`scan.py` prints them, `render_report.py` accepts a directory as output).
 
 ## 1.1 - 2026-10-06

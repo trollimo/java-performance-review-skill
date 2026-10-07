@@ -89,6 +89,41 @@ def esc(s):
     return html.escape(str(s if s is not None else ""), quote=True)
 
 
+_KW = {
+    "c": "abstract as async await break case catch class const continue def default do elif else enum except extends final finally for fun function if implements import in instanceof interface is lambda new not null None object or override package private protected public return self static super switch synchronized this throw throws true True false False try typealias val var void volatile when while with yield from pass raise global nonlocal and del assert open suspend inline data sealed companion init lateinit by where".split(),
+    "sql": "select from where join left right inner outer on group by order having limit offset insert into values update set delete create alter drop table index unique primary key foreign references and or not null in exists between like union all distinct as case when then else end count sum avg min max with using explain analyze".split(),
+    "sh": "FROM RUN CMD COPY ADD ENTRYPOINT ENV ARG EXPOSE WORKDIR USER VOLUME if then else fi for do done while case esac function export server location upstream proxy_pass listen true false null".split(),
+}
+_HASH = {"python", "py", "yaml", "yml", "properties", "bash", "sh", "shell", "dockerfile", "nginx", "toml", "ini", "gradle_hash"}
+
+
+def highlight(code, lang):
+    """Подсветка без внешних библиотек: комментарии, строки, числа, ключевые слова. Неизвестный язык - как есть."""
+    lang = (lang or "").lower()
+    if lang in ("plaintext", "text", ""):
+        return esc(code)
+    if lang == "sql":
+        kws, cm = _KW["sql"], r"--[^\n]*|/\*.*?\*/"
+    elif lang in _HASH:
+        kws, cm = (_KW["sh"] if lang in ("dockerfile", "nginx", "bash", "sh", "shell") else _KW["c"]), r"#[^\n]*"
+    elif lang in ("xml", "html"):
+        kws, cm = [], r"<!--.*?-->"
+    else:
+        kws, cm = _KW["c"], r"//[^\n]*|/\*.*?\*/"
+    flags = re.S | (re.I if lang == "sql" else 0)
+    rx = re.compile(
+        r'(?P<c>' + cm + r')|(?P<s>"""(?:.|\n)*?"""|\'\'\'(?:.|\n)*?\'\'\'|"(?:\\.|[^"\\\n])*"|\'(?:\\.|[^\'\\\n])*\'|`[^`\n]*`)'
+        r'|(?P<n>\b\d[\d_.]*[LlFfDd]?\b)|(?P<k>\b(?:' + "|".join(kws or ["(?!)"]) + r')\b)'
+        + (r'|(?P<t></?[A-Za-z][\w:.-]*)' if lang in ("xml", "html") else ""), flags)
+    out, pos = [], 0
+    for m in rx.finditer(code):
+        out.append(esc(code[pos:m.start()]))
+        out.append(f'<span class="tk-{m.lastgroup}">{esc(m.group())}</span>')
+        pos = m.end()
+    out.append(esc(code[pos:]))
+    return "".join(out)
+
+
 def rich(s):
     return re.sub(r"`([^`\n]+)`", r"<code>\1</code>", esc(s)).replace("\n", "<br>")
 
@@ -220,7 +255,7 @@ def finding_html(f, cards):
     field("Explanation", f.get("explanation"))
     ev = f.get("evidence")
     if ev and ev.get("code"):
-        field("Evidence", f'<pre><code class="language-{esc(ev.get("lang", "plaintext"))}">{esc(ev["code"])}</code></pre>', raw=True)
+        field("Evidence", f'<pre><code>{highlight(ev["code"], ev.get("lang"))}</code></pre>', raw=True)
     field("Recommendation", f.get("recommendation"))
     if f.get("improvement"):
         cls = f["improvement"].lower().replace(" ", "-")
@@ -373,14 +408,11 @@ def render(data, cards):
     meta = " · ".join(esc(x) for x in (data.get("repo"), f'{data["service"]} {data["version"]}' if data.get("service") else None, data.get("mode"), data.get("date"),
                                        "Режим выполнения: Manual" if data.get("engine") == "manual" else None) if x)
     css = (HERE / "report.css").read_text(encoding="utf-8")
-    hl = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0"
-    langs = "".join(f'<script src="{hl}/languages/{l}.min.js"></script>' for l in ("java", "kotlin", "python", "sql", "yaml", "xml", "properties", "gradle", "nginx", "dockerfile", "bash"))
     return (f'<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">'
             f'<title>{esc(data.get("title", "Performance Review Report"))}</title>'
-            f'<link rel="stylesheet" href="{hl}/styles/github-dark.min.css"><script src="{hl}/highlight.min.js"></script>{langs}'
             f'<style>{css}</style></head><body><div class="report-header"><h1>{esc(data.get("title", "Performance Review Report"))}</h1><div class="meta">{meta}</div></div>'
             f'<div class="report-container"><nav class="toc"><h2>📑 Содержание</h2><ul>{toc}</ul></nav>{"".join(parts)}</div>'
-            f'<script>try{{hljs.highlightAll()}}catch(e){{}}document.addEventListener("click",function(e){{var d=e.target.closest("details.rule-pop");'
+            f'<script>document.addEventListener("click",function(e){{var d=e.target.closest("details.rule-pop");'
             f'document.querySelectorAll("details.rule-pop[open]").forEach(function(x){{if(x!==d)x.open=false}})}});</script></body></html>')
 
 
