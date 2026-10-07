@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """Собирает HTML-отчёт из JSON с находками. Шаблон и скоринг в контекст модели не попадают.
 
-    python3 scripts/render_report.py findings.json report.html --repo ПУТЬ [--rules-dir rules]
+    python3 scripts/render_report.py findings.json OUT --repo ПУТЬ [--rules-dir rules]
     python3 scripts/render_report.py --example      # печатает пример входного JSON
+
+OUT — файл или каталог; для каталога имя файла: `performance-review_<сервис>_<версия>[_diff].html`
+(сервис и версия берутся из `service`/`version` JSON или определяются из pom.xml, pyproject.toml, package.json, Gradle, Chart.yaml, git describe).
+Пути в `location` и `coverage` можно писать с обратными слэшами и абсолютными (Windows): они приводятся к относительным.
 
 Находка Critical-Low без `location` (путь:строка), `evidence.code` или с Confidence Low отклоняется: отчёт не собирается.
 С `--repo` (обязателен; `--no-verify` отключает все проверки, только для отладки) дополнительно проверяется:
@@ -366,7 +370,7 @@ def render(data, cards):
     parts.append(method_html())
 
     toc = "".join(f'<li><a href="#{i}">{t}</a></li>' for i, t in sections)
-    meta = " · ".join(esc(x) for x in (data.get("repo"), data.get("mode"), data.get("date"),
+    meta = " · ".join(esc(x) for x in (data.get("repo"), f'{data["service"]} {data["version"]}' if data.get("service") else None, data.get("mode"), data.get("date"),
                                        "Режим выполнения: Manual" if data.get("engine") == "manual" else None) if x)
     css = (HERE / "report.css").read_text(encoding="utf-8")
     hl = "https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0"
@@ -395,8 +399,23 @@ def points(sev, conf, esc_):
     return round(SEV_POINTS.get(sev, 0) * CONF_MULT.get(conf, 1.0) + ESCALATION.get(esc_ or "", 0), 1)
 
 
-def norm_path(p):
-    return str(p).strip().lstrip("./").replace("\\", "/")
+def norm_path(p, repo=None):
+    """Путь с прямыми слэшами, относительно репозитория (Windows: C:\\repo\\a\\b.py и a\\b.py дают a/b.py)."""
+    p = str(p).strip().replace("\\", "/")
+    if repo:
+        root = str(Path(repo).resolve()).replace("\\", "/").rstrip("/")
+        if p.lower().startswith(root.lower() + "/"):
+            p = p[len(root) + 1:]
+    while p.startswith("./"):
+        p = p[2:]
+    return p
+
+
+def normalize_paths(data, repo):
+    for f in data.get("findings", []):
+        m = re.match(r"^\s*((?:[A-Za-z]:)?[^\s:,]+):(\d+)(.*)$", f.get("location") or "")
+        if m:
+            f["location"] = f"{norm_path(m.group(1), repo)}:{m.group(2)}{m.group(3)}"
 
 
 def prepare(data, repo, rules_dir):
@@ -459,8 +478,8 @@ def prepare(data, repo, rules_dir):
             warnings.append(f"{rid}: одновременно в findings и в rejected")
 
     cov = data.get("coverage") or {}
-    read = {norm_path(x) for x in cov.get("read") or []}
-    skipped = {norm_path(x.get("path")): (x.get("reason") or "").strip() for x in cov.get("skipped") or [] if isinstance(x, dict)}
+    read = {norm_path(x, repo) for x in cov.get("read") or []}
+    skipped = {norm_path(x.get("path"), repo): (x.get("reason") or "").strip() for x in cov.get("skipped") or [] if isinstance(x, dict)}
     required = scan.required_files(Path(repo), res["files"], res["detected"], set(res["diff_ranges"]) if res["diff_ranges"] is not None else None)
     data["_required"] = required
     if not cov:
@@ -545,7 +564,14 @@ def main():
         argv.remove("--no-verify")
     if len(argv) != 2 or (repo is None and not no_verify):
         sys.exit(__doc__)
-    data = json.loads(Path(argv[0]).read_text(encoding="utf-8"))
+    data = json.loads(Path(argv[0]).read_text(encoding="utf-8-sig"))
+    if repo:
+        normalize_paths(data, repo)
+        if not data.get("service") or not data.get("version"):
+            import scan
+            name, ver = scan.detect_service(repo)
+            data.setdefault("service", name)
+            data.setdefault("version", ver)
     errors, warnings = prepare(data, repo, rules_dir) if repo else ([], [])
     e2, w2 = validate(data, repo)
     errors += e2
@@ -558,6 +584,10 @@ def main():
             print(f"  ОШИБКА {e}", file=sys.stderr)
         sys.exit(1)
     out = Path(argv[1])
+    if out.is_dir() or argv[1].endswith(("/", "\\")):
+        slug = lambda x: re.sub(r"[^\w.+-]+", "-", str(x or "unknown"), flags=re.UNICODE).strip("-") or "unknown"
+        suffix = "_diff" if data.get("diff") else ""
+        out = out / f"performance-review_{slug(data.get('service'))}_{slug(data.get('version'))}{suffix}.html"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(render(data, load_rules(rules_dir)), encoding="utf-8")
     findings = [f for f in data.get("findings", []) if f.get("severity") in SEV]

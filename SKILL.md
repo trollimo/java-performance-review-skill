@@ -271,6 +271,7 @@ Manual mode: все шаги выполняет агент вручную.
    `python3 <каталог скилла>/scripts/scan.py <репозиторий> [--min-sev High] [--tech python,nginx]`
    Для Quick Review добавить `--min-sev High`, для режима по технологиям — `--tech`.
    Строка вывода: `[Severity] ID название — rules/<tech>/<файл>:<start>-<end>`, под ней число файлов и первые места.
+   Windows: интерпретатор `python` или `py -3`; вывод сканера сохранять в файл (`scan.py <репо> --out scan.txt`, UTF-8) и читать инструментом Read, а не из консоли PowerShell (кодировка). `findings.json` писать в UTF-8 (BOM допустим). Скрипты не требуют SIGALRM, таймауты правил работают на Windows через отдельные процессы. Править scan.py/render_report.py на месте запрещено: при ошибке сообщить о ней.
    Каталог `general` (сквозные правила) и инфраструктурные каталоги (`nginx`, `docker`, `redis`, `migrations`)
    сканируются автоматически, если подходящие файлы есть в репозитории.
    Если Python недоступен, запасной путь: прочитать `rules/<tech>/INDEX.md` нужных технологий и выполнить
@@ -533,13 +534,13 @@ Script mode (по умолчанию): записать находки в JSON �
 Шаблон `report-template.html` и `scoring.md` НЕ читать: Score, Grade, шкала, Fix Order и карточки правил считаются в коде.
 
 1. Записать `findings.json` (во временный каталог, не в репозиторий) по схеме ниже.
-2. `python3 <каталог скилла>/scripts/render_report.py findings.json <путь>/report.html --repo <путь к репозиторию>` (`--repo` обязателен)
+2. `python3 <каталог скилла>/scripts/render_report.py findings.json <каталог или файл .html> --repo <путь к репозиторию>` (`--repo` обязателен; для каталога имя файла `performance-review_<сервис>_<версия>.html`)
    Скрипт печатает число находок, Score (Scan + Review) и Grade. Они попадают в итоговое сообщение пользователю как есть, пересчитывать не нужно.
 3. Не писать HTML вручную.
 
 Схема JSON (поля, кроме `id`, `severity`, `problem`, `location`, `evidence`, необязательны; `python3 scripts/render_report.py --example` печатает пример)
 
-- верхний уровень: `title`, `repo`, `date`, `mode`, `engine` (`script`|`manual`), `summary`, `conclusion`,
+- верхний уровень: `title`, `repo`, `service`, `version`, `date`, `mode`, `engine` (`script`|`manual`), `summary`, `conclusion`,
   `coverage` {`read`[пути], `skipped`[{`path`,`reason`}]} (обязательно), `rejected`[{`id`,`reason`}], `scan` {`min_sev`,`tech`} (те же аргументы, что у scan.py, если задавались), `diff`, `fixed`[],
   `overview` {`stack`, `architecture`, `components`[{`name`,`type`,`tech`,`desc`}]},
   `findings`, `positives`[], `manual_review`[], `insufficient` (true, если архитектуру определить нельзя)
@@ -571,10 +572,12 @@ HTML-отчет должен содержать
 
 ## File Naming
 
-- Markdown: report.md
-- HTML: report.html
+- HTML: `performance-review_<сервис>_<версия>.html` (для diff-режима `..._<версия>_diff.html`).
+  Сервис и версия берутся из `service`/`version` в JSON либо определяются автоматически (pom.xml, pyproject.toml, package.json, Gradle, Chart.yaml, git describe). Сканер печатает их строкой `# Сервис: …, версия: …`.
+  Если передать `render_report.py` каталог вместо файла, имя собирается само.
+- Markdown: `performance-review_<сервис>_<версия>.md` по тому же шаблону.
 
-Если пользователь указал свой путь — использовать его.
+Каталог по умолчанию — корень проверяемого репозитория, если пользователь не указал свой путь. Путь пользователя использовать как есть.
 
 ---
 

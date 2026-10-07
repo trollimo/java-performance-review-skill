@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Выполняет grep-подсказки всех правил по репозиторию и печатает только сработавшие.
 
-    python3 scripts/scan.py REPO [--min-sev High] [--tech python,nginx] [--max-loc 3] [--all] [--tests] [--diff BASE..HEAD]
+    python3 scripts/scan.py REPO [--min-sev High] [--tech python,nginx] [--max-loc 3] [--all] [--tests] [--diff BASE..HEAD] [--out ФАЙЛ]
 
 Каталоги правил выполняются только для технологий, признаки которых найдены в репозитории
 (манифесты зависимостей, имена файлов); `--all` отключает этот фильтр, `--tests` включает тестовые каталоги и файлы (по умолчанию они пропускаются), `--tech` задаёт список вручную.
@@ -10,11 +10,16 @@
 В конце вывода печатается список обязательных к прочтению файлов (coverage): точки входа, конфигурация, слой БД, очереди, инфраструктура;
 в diff-режиме это изменённые файлы. render_report.py требует, чтобы они были в `coverage.read` или в `coverage.skipped` с причиной.
 
+`--out ФАЙЛ` пишет вывод в файл UTF-8 (на Windows надёжнее, чем читать консоль: PowerShell декодирует stdout в кодовой странице консоли).
+Скрипт работает на Windows: без SIGALRM каждое правило выполняется в процессе пула с таймаутом (`--pool` включает это и на других ОС).
+
 Вывод компактный: severity, ID, название, где читать блок правила, число файлов, первые места.
 Правила без подсказки печатаются отдельным списком только для технологий, в которых что-то сработало.
 Не требует ripgrep; regex совместимы с ripgrep, но выполняются Python re по всему тексту файла.
 """
 import fnmatch
+import json
+import multiprocessing
 import os
 import re
 import signal
@@ -28,6 +33,8 @@ from check_grep import HINT, SKIP_DIRS, FORBIDDEN, NOISY_FILES, expand  # noqa: 
 
 MAX_BYTES = 1_000_000
 RULE_TIMEOUT = 2.0
+POOL_TIMEOUT = 30.0
+HAS_ALARM = hasattr(signal, "SIGALRM") and hasattr(signal, "setitimer")
 
 
 class Slow(Exception):
@@ -210,6 +217,87 @@ def git_diff(repo, spec):
     return ranges
 
 
+def _rel(repo, p):
+    return str(p.relative_to(repo)).replace(os.sep, "/")
+
+
+def match_alarm(compiled, files_scan, repo, hits):
+    """Linux/macOS: таймаут на каждый regex через SIGALRM. Возвращает множество пропущенных правил."""
+    skipped = set()
+    signal.signal(signal.SIGALRM, _alarm)
+    for p in files_scan:
+        if p.stat().st_size > MAX_BYTES:
+            continue
+        cands = [c for c in compiled if any(fnmatch.fnmatch(p.name, g) for g in c[1])]
+        if not cands:
+            continue
+        text = p.read_text(encoding="utf-8", errors="ignore")
+        rel = _rel(repo, p)
+        for r, _, rx, neg in cands:
+            if r["id"] in skipped:
+                continue
+            signal.setitimer(signal.ITIMER_REAL, RULE_TIMEOUT)
+            try:
+                if neg and neg.search(text):
+                    continue
+                m = rx.search(text)
+            except Slow:
+                skipped.add(r["id"])
+                continue
+            finally:
+                signal.setitimer(signal.ITIMER_REAL, 0)
+            if m:
+                hits[r["id"]].append((rel, text.count("\n", 0, m.start()) + 1))
+    return skipped
+
+
+def _match_rule(task):
+    rid, pat, neg, items = task
+    rx = re.compile(pat)
+    nx = re.compile(neg) if neg else None
+    out = []
+    for abs_path, rel in items:
+        text = Path(abs_path).read_text(encoding="utf-8", errors="ignore")
+        if nx and nx.search(text):
+            continue
+        m = rx.search(text)
+        if m:
+            out.append((rel, text.count("\n", 0, m.start()) + 1))
+    return rid, out
+
+
+def match_pool(compiled, files_scan, repo, hits):
+    """Windows (нет SIGALRM): каждое правило выполняется в процессе пула; зависшее правило прерывается по таймауту пула."""
+    tasks = []
+    sized = [(p, _rel(repo, p)) for p in files_scan if p.stat().st_size <= MAX_BYTES]
+    for r, globs, rx, neg in compiled:
+        items = [(str(p), rel) for p, rel in sized if any(fnmatch.fnmatch(p.name, g) for g in globs)]
+        if items:
+            tasks.append((r["id"], rx.pattern, neg.pattern if neg else "", items))
+    ctx = multiprocessing.get_context("spawn")
+    skipped, i = set(), 0
+    while i < len(tasks):
+        pool = ctx.Pool(max(1, min(4, os.cpu_count() or 1)))
+        try:
+            pending = [(t[0], pool.apply_async(_match_rule, (t,))) for t in tasks[i:]]
+            finished = True
+            for rid, res in pending:
+                try:
+                    hits[rid].extend(res.get(timeout=POOL_TIMEOUT)[1])
+                    i += 1
+                except multiprocessing.TimeoutError:
+                    skipped.add(rid)
+                    i += 1
+                    finished = False
+                    break
+            if finished:
+                i = len(tasks)
+        finally:
+            pool.terminate()
+            pool.join()
+    return skipped
+
+
 def run_scan(repo, min_sev="Info", techs=None, tests=False, all_techs=False, diff=None):
     """Возвращает словарь: fired [(правило, [(файл, строка)])], compiled, files, allowed, skipped_techs, rules, diff_ranges, ctx_files."""
     techs = set(techs or ())
@@ -235,32 +323,10 @@ def run_scan(repo, min_sev="Info", techs=None, tests=False, all_techs=False, dif
             continue
 
     hits = {r["id"]: [] for r, *_ in compiled}
-    skipped = set()
-    signal.signal(signal.SIGALRM, _alarm)
-    for p in files_scan:
-        if p.stat().st_size > MAX_BYTES:
-            continue
-        cands = [c for c in compiled if any(fnmatch.fnmatch(p.name, g) for g in c[1])]
-        if not cands:
-            continue
-        text = p.read_text(encoding="utf-8", errors="ignore")
-        rel = str(p.relative_to(repo)).replace(os.sep, "/")
-        for r, _, rx, neg in cands:
-            if r["id"] in skipped:
-                continue
-            signal.setitimer(signal.ITIMER_REAL, RULE_TIMEOUT)
-            try:
-                if neg and neg.search(text):
-                    continue
-                m = rx.search(text)
-            except Slow:
-                skipped.add(r["id"])
-                print(f"# ПРЕДУПРЕЖДЕНИЕ: подсказка {r['id']} слишком медленная, пропущена", file=sys.stderr)
-                continue
-            finally:
-                signal.setitimer(signal.ITIMER_REAL, 0)
-            if m:
-                hits[r["id"]].append((rel, text.count("\n", 0, m.start()) + 1))
+    use_pool = "--pool" in sys.argv or not HAS_ALARM
+    skipped = match_pool(compiled, files_scan, repo, hits) if use_pool else match_alarm(compiled, files_scan, repo, hits)
+    for rid in sorted(skipped):
+        print(f"# ПРЕДУПРЕЖДЕНИЕ: подсказка {rid} слишком медленная, пропущена", file=sys.stderr)
 
     fired = [(r, hits[r["id"]]) for r, *_ in compiled if hits[r["id"]]]
     fired.sort(key=lambda x: (SEV_ORDER.get(x[0]["sev"], 9), -len(x[1]), x[0]["id"]))
@@ -268,7 +334,67 @@ def run_scan(repo, min_sev="Info", techs=None, tests=False, all_techs=False, dif
             "skipped_techs": skipped_techs, "rules": rules, "diff_ranges": diff_ranges, "detected": detected}
 
 
+def detect_service(repo):
+    """(имя сервиса, версия) по корневым манифестам; запасной вариант: имя каталога и git describe."""
+    repo = Path(repo)
+
+    def rd(name):
+        f = repo / name
+        return f.read_text(encoding="utf-8-sig", errors="ignore") if f.is_file() else ""
+
+    name = version = None
+    t = rd("pom.xml")
+    if t:
+        t = re.sub(r"<(parent|dependencies|dependencyManagement|build|profiles|plugins)>.*?</\1>", "", t, flags=re.S)
+        m = re.search(r"<artifactId>([^<]+)</artifactId>", t)
+        name = m.group(1).strip() if m else None
+        m = re.search(r"<version>([^<$]+)</version>", t)
+        version = m.group(1).strip() if m else None
+    t = rd("pyproject.toml")
+    if t and not name:
+        m = re.search(r"^\[(?:project|tool\.poetry)\]\s*$(.*?)(?=^\[|\Z)", t, re.M | re.S)
+        if m:
+            n, v = re.search(r'^name\s*=\s*["\']([^"\']+)', m.group(1), re.M), re.search(r'^version\s*=\s*["\']([^"\']+)', m.group(1), re.M)
+            name, version = n.group(1) if n else None, v.group(1) if v else None
+    t = rd("package.json")
+    if t and not name:
+        try:
+            j = json.loads(t)
+            name, version = j.get("name"), j.get("version")
+        except ValueError:
+            pass
+    for g in ("build.gradle", "build.gradle.kts"):
+        t = rd(g)
+        if t and not version:
+            m = re.search(r'^\s*version\s*=\s*["\']([^"\']+)', t, re.M)
+            version = m.group(1) if m else None
+    for g in ("settings.gradle", "settings.gradle.kts"):
+        m = re.search(r'rootProject\.name\s*=\s*["\']([^"\']+)', rd(g))
+        if m and not name:
+            name = m.group(1)
+    t = rd("Chart.yaml")
+    if t and not name:
+        n, v = re.search(r"^name:\s*(\S+)", t, re.M), re.search(r"^(?:appVersion|version):\s*[\"']?([^\s\"']+)", t, re.M)
+        name, version = n.group(1) if n else None, v.group(1) if v else None
+    if not version:
+        try:
+            version = subprocess.run(["git", "-C", str(repo), "describe", "--tags", "--always"], capture_output=True, text=True, check=True).stdout.strip() or None
+        except (OSError, subprocess.CalledProcessError):
+            pass
+    return name or repo.resolve().name, version or "unknown"
+
+
 def main():
+    out_path = arg("--out")
+    if not out_path:
+        return scan_main()
+    import contextlib
+    with open(out_path, "w", encoding="utf-8") as fh, contextlib.redirect_stdout(fh):
+        scan_main()
+    print(f"scan → {out_path} ({Path(out_path).stat().st_size} байт, UTF-8): прочитайте файл инструментом Read")
+
+
+def scan_main():
     repo_arg = next((a for a in sys.argv[1:] if not a.startswith("--") and Path(a).is_dir()), None)
     if not repo_arg:
         sys.exit(__doc__)
@@ -281,6 +407,8 @@ def main():
     scope = f"; режим diff {diff}: изменённых файлов {len(ranges)}" if ranges is not None else ""
     print(f"# Сработало правил: {len(fired)} из {res['compiled']} с подсказкой; файлов в репозитории: {len(res['files'])}{scope}")
     print(f"# Технологии: {', '.join(sorted(allowed))}" + (f"; пропущены без признаков: {', '.join(res['skipped_techs'])}" if res["skipped_techs"] and not techs else ""))
+    sname, sver = detect_service(repo)
+    print(f"# Сервис: {sname}, версия: {sver}")
     print("# Совпадение = кандидат, не находка: в отчёт попадает только то, что подтверждено прочитанным кодом (location + evidence)")
     print("# Каждое сработавшее Critical/High правило (кроме ARCH-*) закрыть: находка или запись в rejected с причиной")
     print("# Читать блок правила: Read <путь> offset=<start> limit=<end-start+1>\n")
