@@ -1,4 +1,4 @@
-﻿# 🚀 Java Performance Reviewer Skill
+﻿# 🚀 Performance Review Skill
 
 > **A knowledge base for AI agents that perform static performance reviews of Java, Kotlin and Python (Django, asyncio) repositories.**
 
@@ -146,7 +146,7 @@ Example: High (6) × Medium (0.7) = 4.2, plus `hot` (+3) = 7.2. Per-area tables 
 
 ## 📌 Status
 
-**Version 1.1**
+**Version 1.2**
 
 Designed to grow incrementally by adding new technologies and performance practices while maintaining a consistent rule structure.
 

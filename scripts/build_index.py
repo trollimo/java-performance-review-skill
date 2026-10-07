@@ -75,9 +75,12 @@ def parse(path):
                 if len(nxt) > 1 and nxt[1].startswith("Нет:"):
                     neg = nxt[1][4:].strip().strip("`")
                 break
+        conf = first_after(block, r"^(##\s*)?Confidence\s*$")
+        esc = first_after(block, r"^(##\s*)?Escalation\s*$")
         if title.startswith("#") or not title:
             title = rid
         yield {"id": rid, "title": title, "sev": sev, "grep": grep, "neg": neg,
+               "conf": conf if conf in ("High", "Medium") else "Medium", "esc": esc if esc in ("hot", "scheduler", "system") else "",
                "file": path.name, "start": i + 1, "end": i + len(block)}
 
 

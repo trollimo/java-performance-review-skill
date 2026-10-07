@@ -26,6 +26,10 @@ Category
 
 Event Loop
 
+Escalation
+
+hot
+
 ---
 
 ### Grep
@@ -119,6 +123,10 @@ Medium
 Category
 
 Event Loop
+
+Escalation
+
+hot
 
 ---
 
@@ -684,6 +692,10 @@ Medium
 Category
 
 Event Loop
+
+Escalation
+
+hot
 
 ---
 
@@ -1314,6 +1326,10 @@ Medium
 Category
 
 Scalability
+
+Escalation
+
+system
 
 ---
 

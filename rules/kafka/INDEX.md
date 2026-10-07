@@ -21,10 +21,10 @@
 - KAFKA-028 [Critical] commit после каждого сообщения (consumer.md:253-273) — grep: `*.{java,kt,py}` :: `(for \([^)]*[rR]ecords\)|[rR]ecords\.forEach|for \w+ in \w*consumer\b)(?:.|\n){0,1500}?\.(commitSync|commitAsync|acknowledge|commit)\(|ack-mode\W{0,3}(record|RECORD)|AckMode\.RECORD\b`
 - KAFKA-030 [Critical] Большая транзакция внутри Consumer (consumer.md:303-323) — grep: `*.{java,kt}` :: `@KafkaListener(?:.|\n){0,1500}?(@Transactional|[tT]ransactionTemplate|executeWithoutResult)|@Transactional(?:.|\n){0,300}?@KafkaListener`
 - KAFKA-040 [Critical] Consumer ограничивает масштабирование сервиса (consumer.md:548-605)
-- KAFKA-041 [Critical] Недостаточное количество партиций (scaling.md:7-63) — grep: `*.{java,kt,yml,yaml,properties,sh,py}` :: `\.partitions\(\s*[1-3]\s*\)|new NewTopic\(\s*[^,]+,\s*[1-3]\s*,|--partitions[= ]+[1-3]\b|\bpartitions\W{0,4}[1-3]\b|num[._]partitions\W{0,4}[1-3]\b|partition-?[cC]ount\W{0,4}[1-3]\b`
-- KAFKA-043 [Critical] Hot Partition (scaling.md:93-148) — grep: `*.{java,kt}` :: `(ProducerRecord<[^>]*>|\.send)\(\s*[^,()]+,\s*([^,()]*([sS]tatus|[tT]ype|[cC]ountry|[tT]enant|[rR]egion|[cC]ategory|[lL]ang)\w*(\(\))?|"[^"]*")\s*,`
-- KAFKA-053 [Critical] Consumer Lag постоянно растет (scaling.md:386-404)
-- KAFKA-059 [Critical] Архитектура ограничивает горизонтальное масштабирование (scaling.md:523-546)
+- KAFKA-041 [Critical] Недостаточное количество партиций (scaling.md:7-67) — grep: `*.{java,kt,yml,yaml,properties,sh,py}` :: `\.partitions\(\s*[1-3]\s*\)|new NewTopic\(\s*[^,]+,\s*[1-3]\s*,|--partitions[= ]+[1-3]\b|\bpartitions\W{0,4}[1-3]\b|num[._]partitions\W{0,4}[1-3]\b|partition-?[cC]ount\W{0,4}[1-3]\b`
+- KAFKA-043 [Critical] Hot Partition (scaling.md:97-152) — grep: `*.{java,kt}` :: `(ProducerRecord<[^>]*>|\.send)\(\s*[^,()]+,\s*([^,()]*([sS]tatus|[tT]ype|[cC]ountry|[tT]enant|[rR]egion|[cC]ategory|[lL]ang)\w*(\(\))?|"[^"]*")\s*,`
+- KAFKA-053 [Critical] Consumer Lag постоянно растет (scaling.md:390-408)
+- KAFKA-059 [Critical] Архитектура ограничивает горизонтальное масштабирование (scaling.md:527-550)
 - KAFKA-002 [High] linger.ms = 0 (producer.md:66-96) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `linger[._]ms\W{0,6}0\b|LINGER_MS_CONFIG\W{1,4}0\b`
 - KAFKA-004 [High] compression.type отсутствует (producer.md:126-165) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `ProducerConfig\.\w+|new KafkaProducer|DefaultKafkaProducerFactory|spring\.kafka\.producer|\bproducer:` ; нет: `compression[._-](type|codec)|COMPRESSION_TYPE_CONFIG`
 - KAFKA-007 [High] acks=0 (producer.md:223-243) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `\backs\W{0,6}0\b|ACKS_CONFIG\W{1,4}0\b`
@@ -35,12 +35,12 @@
 - KAFKA-032 [High] Consumer хранит состояние (consumer.md:353-373) — grep: `*.{java,kt}` :: `(Map|List|Set|Queue|AtomicLong|AtomicInteger)(<[^;]*>)?\s+\w+\s*=\s*new(?:.|\n){0,2500}?(@KafkaListener|\.poll\()`
 - KAFKA-037 [High] Retry внутри Consumer (consumer.md:469-497) — grep: `*.{java,kt,py}` :: `(@KafkaListener|\.poll\()(?:.|\n){0,2500}?(@Retryable|RetryTemplate|retryTemplate|Retry\.|Thread\.sleep|time\.sleep|tenacity)|@Retryable(?:.|\n){0,300}?@KafkaListener|FixedBackOff\(|ExponentialBackOff\(`
 - KAFKA-039 [High] Нет мониторинга Consumer Lag (consumer.md:519-544) — grep: `{pom.xml,build.gradle,build.gradle.kts}` :: `spring-kafka|kafka-clients|spring-cloud-stream-binder-kafka|reactor-kafka|kafka-streams` ; нет: `micrometer|actuator|kafka-exporter|opentelemetry|jmx`
-- KAFKA-046 [High] Ordering зависит от нескольких Partition (scaling.md:214-235) — grep: `*.{java,kt}` :: `partitioner\.class|PARTITIONER_CLASS_CONFIG|implements Partitioner|ProducerRecord<[^>]*>\(\s*[^,()]+,\s*\d+\s*,|[kK]afkaTemplate\.send\(\s*[^,()]+,\s*\d+\s*,`
-- KAFKA-047 [High] Количество Consumer больше количества Partition (scaling.md:239-260) — grep: `*.{java,kt,yml,yaml,properties}` :: `setConcurrency\(|@KafkaListener\([^)]*concurrency|\bconcurrency\W{1,4}\d+|listener\.concurrency`
-- KAFKA-049 [High] Частые Rebalance (scaling.md:289-317) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `session[._-]timeout[._-]ms\W{0,6}\d{1,4}\b|SESSION_TIMEOUT_MS_CONFIG|heartbeat[._-]interval[._-]ms|ConsumerRebalanceListener|onPartitionsRevoked|group[._-]instance[._-]id`
-- KAFKA-054 [High] Producer значительно быстрее Consumer (scaling.md:408-423)
-- KAFKA-056 [High] Сообщения слишком большие (scaling.md:449-471) — grep: `*.{java,kt}` :: `(ProducerRecord<[^>]*>|\.send)\([^)]*(readAllBytes|toByteArray|Files\.read|getBytes)`
-- KAFKA-058 [High] Broker может стать узким местом (scaling.md:499-519)
+- KAFKA-046 [High] Ordering зависит от нескольких Partition (scaling.md:218-239) — grep: `*.{java,kt}` :: `partitioner\.class|PARTITIONER_CLASS_CONFIG|implements Partitioner|ProducerRecord<[^>]*>\(\s*[^,()]+,\s*\d+\s*,|[kK]afkaTemplate\.send\(\s*[^,()]+,\s*\d+\s*,`
+- KAFKA-047 [High] Количество Consumer больше количества Partition (scaling.md:243-264) — grep: `*.{java,kt,yml,yaml,properties}` :: `setConcurrency\(|@KafkaListener\([^)]*concurrency|\bconcurrency\W{1,4}\d+|listener\.concurrency`
+- KAFKA-049 [High] Частые Rebalance (scaling.md:293-321) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `session[._-]timeout[._-]ms\W{0,6}\d{1,4}\b|SESSION_TIMEOUT_MS_CONFIG|heartbeat[._-]interval[._-]ms|ConsumerRebalanceListener|onPartitionsRevoked|group[._-]instance[._-]id`
+- KAFKA-054 [High] Producer значительно быстрее Consumer (scaling.md:412-427)
+- KAFKA-056 [High] Сообщения слишком большие (scaling.md:453-475) — grep: `*.{java,kt}` :: `(ProducerRecord<[^>]*>|\.send)\([^)]*(readAllBytes|toByteArray|Files\.read|getBytes)`
+- KAFKA-058 [High] Broker может стать узким местом (scaling.md:503-523)
 - KAFKA-003 [Medium] batch.size слишком маленький (producer.md:100-122) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `producer\.batch-size|\bbatch\.size|BATCH_SIZE_CONFIG`
 - KAFKA-005 [Medium] gzip используется для сообщений высокой частоты (producer.md:169-189) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `compression[._-]type\W{0,6}gzip|COMPRESSION_TYPE_CONFIG\W{1,4}gzip|CompressionType\.GZIP`
 - KAFKA-006 [Medium] acks=all без необходимости (producer.md:193-219) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `\backs\W{0,6}(all|-1)\b|ACKS_CONFIG\W{1,4}(all|-1)\b`
@@ -55,16 +55,16 @@
 - KAFKA-034 [Medium] Большой JSON десериализуется полностью (consumer.md:401-421) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `(@KafkaListener|\.poll\()(?:.|\n){0,2500}?(readTree|readValue|fromJson|json\.loads)\(|(value[._-]deserializer|VALUE_DESERIALIZER_CLASS_CONFIG)\W.*Json|kafka\.support\.serializer\.JsonDeserializer`
 - KAFKA-036 [Medium] Нет Dead Letter Queue (consumer.md:443-465) — grep: `*.{java,kt,py}` :: `@KafkaListener|KafkaConsumer<|new KafkaConsumer|AIOKafkaConsumer|\bConsumer\(\{` ; нет: `DeadLetter|[dD]ead[-_.]?[lL]etter|DLQ|dlq|DLT|dlt|DefaultErrorHandler|CommonErrorHandler|SeekToCurrentErrorHandler|RetryableTopic`
 - KAFKA-038 [Medium] Consumer создает большое количество объектов (consumer.md:501-515)
-- KAFKA-042 [Medium] Слишком много Partition (scaling.md:67-89) — grep: `*.{java,kt,yml,yaml,properties,sh,py}` :: `\.partitions\(\s*\d{3,}\s*\)|new NewTopic\(\s*[^,]+,\s*\d{3,}\s*,|--partitions[= ]+\d{3,}\b|\bpartitions\W{0,4}\d{3,}\b|num[._]partitions\W{0,4}\d{3,}\b`
-- KAFKA-044 [Medium] Случайный Partition Key (scaling.md:152-174) — grep: `*.{java,kt,py}` :: `(ProducerRecord<[^>]*>|\.send)\([^)]*(randomUUID|ThreadLocalRandom|new Random|nanoTime|currentTimeMillis)|(produce|send)\(.*uuid4\(`
-- KAFKA-045 [Medium] Partition Key не соответствует бизнес-сущности (scaling.md:178-210) — grep: `*.{java,kt}` :: `([kK]afka\w*|[pP]roducer)\.send\(\s*[\w."]+\s*,\s*[^,]*\)|new ProducerRecord<[^>]*>\(\s*[\w."]+\s*,\s*[^,]*\)`
-- KAFKA-048 [Medium] Большое количество Consumer Group (scaling.md:264-285) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `groupId\s*=\s*"|group[._-]id\W{1,4}\S|GROUP_ID_CONFIG|group_id\s*=|groupId.*(randomUUID|random)`
-- KAFKA-051 [Medium] Нет мониторинга Rebalance (scaling.md:347-363)
-- KAFKA-052 [Medium] Нет мониторинга Partition Skew (scaling.md:367-382)
-- KAFKA-055 [Medium] Нет ограничения скорости обработки (scaling.md:427-445)
-- KAFKA-057 [Medium] Нет Compression (scaling.md:475-495) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `ProducerConfig\.\w+|new KafkaProducer|DefaultKafkaProducerFactory|spring\.kafka\.producer|\bproducer:` ; нет: `compression[._-](type|codec)|COMPRESSION_TYPE_CONFIG`
+- KAFKA-042 [Medium] Слишком много Partition (scaling.md:71-93) — grep: `*.{java,kt,yml,yaml,properties,sh,py}` :: `\.partitions\(\s*\d{3,}\s*\)|new NewTopic\(\s*[^,]+,\s*\d{3,}\s*,|--partitions[= ]+\d{3,}\b|\bpartitions\W{0,4}\d{3,}\b|num[._]partitions\W{0,4}\d{3,}\b`
+- KAFKA-044 [Medium] Случайный Partition Key (scaling.md:156-178) — grep: `*.{java,kt,py}` :: `(ProducerRecord<[^>]*>|\.send)\([^)]*(randomUUID|ThreadLocalRandom|new Random|nanoTime|currentTimeMillis)|(produce|send)\(.*uuid4\(`
+- KAFKA-045 [Medium] Partition Key не соответствует бизнес-сущности (scaling.md:182-214) — grep: `*.{java,kt}` :: `([kK]afka\w*|[pP]roducer)\.send\(\s*[\w."]+\s*,\s*[^,]*\)|new ProducerRecord<[^>]*>\(\s*[\w."]+\s*,\s*[^,]*\)`
+- KAFKA-048 [Medium] Большое количество Consumer Group (scaling.md:268-289) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `groupId\s*=\s*"|group[._-]id\W{1,4}\S|GROUP_ID_CONFIG|group_id\s*=|groupId.*(randomUUID|random)`
+- KAFKA-051 [Medium] Нет мониторинга Rebalance (scaling.md:351-367)
+- KAFKA-052 [Medium] Нет мониторинга Partition Skew (scaling.md:371-386)
+- KAFKA-055 [Medium] Нет ограничения скорости обработки (scaling.md:431-449)
+- KAFKA-057 [Medium] Нет Compression (scaling.md:479-499) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `ProducerConfig\.\w+|new KafkaProducer|DefaultKafkaProducerFactory|spring\.kafka\.producer|\bproducer:` ; нет: `compression[._-](type|codec)|COMPRESSION_TYPE_CONFIG`
 - KAFKA-015 [Low] Повторная сериализация одинаковых объектов (producer.md:457-465)
 - KAFKA-026 [Low] max.poll.records слишком маленький (consumer.md:197-217) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `max[._-]poll[._-]records\W{0,6}[1-9]\d?\b|MAX_POLL_RECORDS_CONFIG\W{1,4}[1-9]\d?\b`
 - KAFKA-035 [Low] Повторная десериализация (consumer.md:425-439) — grep: `*.{java,kt}` :: `(@KafkaListener|\.poll\()(?:.|\n){0,2500}?(readValue|readTree|fromJson)\((?:.|\n){0,1000}?(readValue|readTree|fromJson)\(`
-- KAFKA-050 [Low] Sticky Assignor не используется (scaling.md:321-343) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `ConsumerConfig\.\w+|new KafkaConsumer|DefaultKafkaConsumerFactory|spring\.kafka\.consumer|\bconsumer:` ; нет: `partition[._-]assignment[._-]strategy|PARTITION_ASSIGNMENT_STRATEGY|CooperativeSticky|StickyAssignor|group[._-]instance[._-]id`
-- KAFKA-060 [Info] Необходима ручная проверка Kafka Cluster (scaling.md:550-616)
+- KAFKA-050 [Low] Sticky Assignor не используется (scaling.md:325-347) — grep: `*.{java,kt,py,yml,yaml,properties}` :: `ConsumerConfig\.\w+|new KafkaConsumer|DefaultKafkaConsumerFactory|spring\.kafka\.consumer|\bconsumer:` ; нет: `partition[._-]assignment[._-]strategy|PARTITION_ASSIGNMENT_STRATEGY|CooperativeSticky|StickyAssignor|group[._-]instance[._-]id`
+- KAFKA-060 [Info] Необходима ручная проверка Kafka Cluster (scaling.md:554-620)

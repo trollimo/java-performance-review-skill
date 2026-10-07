@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2 - 2026-10-07
+
+### Changed
+
+- Skill renamed to `performance-review-skill` (frontmatter `name`, titles).
+- Analysis Modes: the list of eight modes is kept; Full Performance Review is the default when no mode is given (no question).
+- Scoring split into Scan Score (confirmed scanner hits at rule defaults, stable) and Review Score (reviewer findings, deviations, reviewer escalation).
+
+### Added
+
+- Review Protocol with fixed depth: mandatory files (`coverage`), a verdict (finding or `rejected`) for every fired Critical/High rule.
+- Diff mode: `scan.py --diff BASE..HEAD`, `[в диффе]` marks, checklist of fix-introduced defects, `fixed` list in the report.
+- `render_report.py` requires `--repo` and rejects reports with unread mandatory files, unclosed Critical/High candidates, duplicate (rule, file) findings or undeclared deviations.
+- Optional per-rule `Escalation` field (set for Event Loop and Scalability rules); `conf`/`esc` parsed by `build_index.py`.
+- Coverage section in the HTML report.
+- Scanner skips `.md`/`.rst` files and `docs/`.
+
 ## 1.1 - 2026-10-06
 
 ### Added

@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """Собирает HTML-отчёт из JSON с находками. Шаблон и скоринг в контекст модели не попадают.
 
-    python3 scripts/render_report.py findings.json report.html [--repo ПУТЬ] [--rules-dir rules]
+    python3 scripts/render_report.py findings.json report.html --repo ПУТЬ [--rules-dir rules]
     python3 scripts/render_report.py --example      # печатает пример входного JSON
 
 Находка Critical-Low без `location` (путь:строка), `evidence.code` или с Confidence Low отклоняется: отчёт не собирается.
-С `--repo` дополнительно проверяется, что файл существует, строка в его пределах, а фрагмент evidence есть в файле.
+С `--repo` (обязателен; `--no-verify` отключает все проверки, только для отладки) дополнительно проверяется:
+файл существует, строка в его пределах, фрагмент evidence есть в файле; `coverage.read`/`coverage.skipped` покрывают обязательные файлы
+(см. вывод scan.py); каждое сработавшее Critical/High правило закрыто находкой или записью в `rejected`; находки не дублируют (id, файл).
+Для находки по правилу, сработавшему в сканере, severity/confidence/escalation можно не указывать: берутся дефолты правила.
+Отличие severity/confidence от дефолтов требует `deviation` (объяснение) и переводит находку из Scan Score в Review Score;
+эскалация, выбранная ревьюером сверх дефолта правила, добавляется в Review Score.
 
 Вход (обязательны id/severity/problem, для Critical-Low ещё location и evidence.code):
 {
@@ -22,7 +27,11 @@
      "improvement": "Very High|High|Medium|Low|Unknown", "related": ["PY-043"],
      "escalation": "hot|scheduler|system"
   }],
-  "positives": ["..."], "manual_review": ["..."]
+  "positives": ["..."], "manual_review": ["..."],
+  "coverage": {"read": ["путь", "..."], "skipped": [{"path": "путь", "reason": "почему не читал"}]},
+  "rejected": [{"id": "SQL-002", "reason": "SELECT * только в скрипте миграции"}],
+  "scan": {"min_sev": "High", "tech": "python,nginx"},   # те же аргументы, что у scan.py (если задавались)
+  "diff": "base..head", "fixed": ["что исправлено и чем подтверждено"]   # только в diff-режиме
 }
 Текст поддерживает `код` в обратных кавычках. ID правил становятся кликабельными: по клику раскрывается
 краткая суть правила (берётся из rules/*/*.md, в контекст модели не попадает).
@@ -36,7 +45,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
-from build_index import HEAD  # noqa: E402
+from build_index import HEAD, parse  # noqa: E402
 
 SEV = ["Critical", "High", "Medium", "Low", "Info"]
 SEV_POINTS = {"Critical": 10, "High": 6, "Medium": 3, "Low": 1, "Info": 0}
@@ -88,6 +97,8 @@ def grade_of(score):
 
 
 def finding_points(f):
+    if "_pts" in f:
+        return f["_pts"]
     sev = f.get("severity", "Info")
     if sev == "Info":
         return 0.0
@@ -240,6 +251,10 @@ def method_html():
             '<p class="scale-note">Эскалация — надбавка за то, где живёт проблема. Один и тот же дефект в редком админ-эндпоинте и в коде каждого запроса стоит по-разному: '
             'чем чаще и шире выполняется код, тем сильнее он бьёт по системе. Ревьюер выбирает одно значение для находки (они не суммируются); '
             'если ни одно не подходит, надбавка 0.</p>'
+            '<p class="scale-note"><b>Scan Score и Review Score.</b> Находка по правилу, которое сработало в сканере и подтверждено кодом, '
+            'получает баллы по значениям самого правила (Severity, Confidence, эскалация) и входит в Scan Score: он не зависит от оценок ревьюера. '
+            'Находки, добавленные ревьюером, находки с отклонением Severity/Confidence от правила (с объяснением) и эскалация, выбранная ревьюером, входят в Review Score. '
+            'Оценка отчёта = Scan Score + Review Score; «до/после» сравнивают по Scan Score.</p>'
             '<p class="scale-note">Пример: High (6) × Medium (0.7) = 4.2, плюс hot (+3) = 7.2. '
             'Таблицы по областям (Architecture, Database, …) разбивают ту же сумму и повторно не складываются. '
             'Оценка зависит от полноты ревью: сравнивать отчёты «до/после» корректно при одинаковой глубине анализа.</p>'
@@ -265,13 +280,20 @@ def render(data, cards):
     else:
         verdict_cls, verdict = "yes", "Можно выпускать"
 
+    scan_s, rev_s = data.get("_scan_score"), data.get("_review_score")
+    split = ""
+    if scan_s is not None:
+        split = (f'<p class="scale-note">Scan Score <b>{scan_s:g}</b> (подтверждённые срабатывания сканера, баллы по значениям правил; для сравнения «до/после») · '
+                 f'Review Score <b>{rev_s:g}</b> (находки ревью и отклонения от значений правила).</p>')
+    if data.get("diff"):
+        split += f'<p class="scale-note">Diff-режим <code>{esc(data["diff"])}</code>: оценка относится только к изменениям и с оценкой Full-отчёта не сравнивается.</p>'
     sections = [("executive-summary", "📊 Executive Summary"), ("performance-score", "🎯 Performance Score")]
     parts = []
     cards_html = "".join(f'<div class="metric-card {s.lower()}"><div class="value">{counts[s]}</div><div class="label">{s}</div></div>' for s in SEV)
     parts.append(f'<section id="executive-summary"><h2>📊 Executive Summary</h2><div class="section-body"><div class="dashboard">'
                  f'<a class="metric-card grade-{letter.lower()} score-link" href="#scoring-method" title="Как считается оценка"><div class="value">{letter}</div><div class="label">Performance Grade · {risk_name}</div></a>'
                  f'<a class="metric-card score-link" href="#scoring-method" title="Как считается оценка"><div class="value">{score:g}</div><div class="label">Performance Risk</div></a>{cards_html}</div>'
-                 f'{scale_html(score)}<p style="margin-top:1rem">{rich(data.get("summary", ""))}</p></div></section>')
+                 f'{scale_html(score)}{split}<p style="margin-top:1rem">{rich(data.get("summary", ""))}</p></div></section>')
 
     ov = data.get("overview") or {}
     if ov.get("components") or ov.get("stack") or ov.get("architecture"):
@@ -295,7 +317,7 @@ def render(data, cards):
     parts.append(f'<section id="performance-score"><h2>🎯 Performance Score</h2><div class="section-body">{scale_html(score)}'
                  f'<h3>Из чего сложилась оценка</h3><table class="breakdown"><thead><tr><th>Severity</th><th class="num">Находок</th><th class="num">Вес</th><th class="num">Баллы</th></tr></thead>'
                  f'<tbody>{sev_rows}<tr><td><b>Итого</b></td><td class="num">{len(findings)}</td><td></td><td class="num"><b>{score:g}</b></td></tr></tbody></table>'
-                 f'<h3>Разрез по областям</h3><table class="breakdown"><thead><tr><th>Область</th><th class="num">Баллы</th></tr></thead><tbody>{cat_rows}</tbody></table>'
+                 f'{split}<h3>Разрез по областям</h3><table class="breakdown"><thead><tr><th>Область</th><th class="num">Баллы</th></tr></thead><tbody>{cat_rows}</tbody></table>'
                  f'<p class="scale-note">Баллы находки = вес Severity × коэффициент Confidence (High 1.0, Medium 0.7, Low 0.4) + эскалация '
                  f'(горячий путь +3, scheduler/batch +2, вся система +5). Info не даёт баллов. Области — разрез тех же баллов, повторно они не суммируются.</p>'
                  f'</div></section>')
@@ -321,6 +343,13 @@ def render(data, cards):
                      f'<td>{rich(f.get("recommendation") or f.get("problem", ""))}</td><td>{esc(f.get("improvement", ""))}</td></tr>' for n, f in enumerate(order, 1))
         parts.append(f'<section id="fix-order"><h2>🔧 Fix Order</h2><div class="section-body"><table><thead><tr><th>#</th><th>Правило</th><th>Severity</th><th>Место</th><th>Что сделать</th><th>Эффект</th></tr></thead><tbody>{tr}</tbody></table></div></section>')
 
+    if data.get("fixed"):
+        sections.append(("fixed", "✔️ Исправлено"))
+        parts.append('<section id="fixed"><h2>✔️ Исправлено</h2><div class="section-body"><ul>' + "".join(f"<li>{rich(x)}</li>" for x in data["fixed"]) + "</ul></div></section>")
+    cov_html = coverage_html(data)
+    if cov_html:
+        sections.append(("coverage", "🔎 Покрытие анализа"))
+        parts.append(f'<section id="coverage"><h2>🔎 Покрытие анализа</h2><div class="section-body">{cov_html}</div></section>')
     if data.get("manual_review"):
         sections.append(("manual-review", "👀 Manual Review Required"))
         parts.append('<section id="manual-review"><h2>👀 Manual Review Required</h2><div class="section-body"><ul>' + "".join(f"<li>{rich(x)}</li>" for x in data["manual_review"]) + "</ul></div></section>")
@@ -349,6 +378,118 @@ def render(data, cards):
             f'<div class="report-container"><nav class="toc"><h2>📑 Содержание</h2><ul>{toc}</ul></nav>{"".join(parts)}</div>'
             f'<script>try{{hljs.highlightAll()}}catch(e){{}}document.addEventListener("click",function(e){{var d=e.target.closest("details.rule-pop");'
             f'document.querySelectorAll("details.rule-pop[open]").forEach(function(x){{if(x!==d)x.open=false}})}});</script></body></html>')
+
+
+def rule_meta(rules_dir):
+    meta = {}
+    for path in sorted(rules_dir.glob("*/*.md")):
+        if path.name != "INDEX.md":
+            for r in parse(path):
+                meta[r["id"]] = r
+    return meta
+
+
+def points(sev, conf, esc_):
+    if sev == "Info":
+        return 0.0
+    return round(SEV_POINTS.get(sev, 0) * CONF_MULT.get(conf, 1.0) + ESCALATION.get(esc_ or "", 0), 1)
+
+
+def norm_path(p):
+    return str(p).strip().lstrip("./").replace("\\", "/")
+
+
+def prepare(data, repo, rules_dir):
+    """Дефолты правил, Scan/Review Score, вердикты по кандидатам, coverage, слияние по (id, файл). Возвращает (errors, warnings)."""
+    import scan
+    errors, warnings = [], []
+    cfg = data.get("scan") or {}
+    diff = data.get("diff")
+    res = scan.run_scan(Path(repo), cfg.get("min_sev", "Info"), set((cfg.get("tech") or "").split(",")) - {""}, diff=diff)
+    fired = {r["id"]: r for r, _ in res["fired"]}
+    meta = rule_meta(rules_dir)
+    findings = [f for f in data.get("findings", [])]
+    seen, counted = {}, set()
+    scan_score = review_score = 0.0
+    for f in findings:
+        fid = f.get("id") or f.get("title") or "?"
+        m = LOC.match(f.get("location") or "")
+        key = (f.get("id"), m.group(1) if m else None)
+        if f.get("id") and m:
+            if key in seen:
+                errors.append(f"{fid}: две находки по одному правилу в одном файле {key[1]}; объедините в одну (места перечислите в problem)")
+            seen[key] = True
+        r = fired.get(f.get("id"))
+        f["_kind"] = "review"
+        if r:
+            d = meta.get(f["id"], r)
+            sev, conf, esc_ = f.get("severity") or d["sev"], f.get("confidence") or d["conf"], f.get("escalation") or d["esc"]
+            f.setdefault("severity", sev)
+            f.setdefault("confidence", conf)
+            if d["esc"] and not f.get("escalation"):
+                f["escalation"] = d["esc"]
+            diffs = [n for n, a, b in (("severity", sev, d["sev"]), ("confidence", conf, d["conf"])) if a != b]
+            if diffs and not f.get("deviation"):
+                errors.append(f"{fid}: {' и '.join(diffs)} отличаются от значений правила ({d['sev']}/{d['conf']}); "
+                              f"объясните в поле deviation или уберите отклонение")
+            if not diffs:
+                f["_kind"] = "scan"
+                base = 0.0 if f["id"] in counted else points(d["sev"], d["conf"], d["esc"])
+                extra = 0.0 if d["sev"] == "Info" else float(ESCALATION.get(esc_, 0) - ESCALATION.get(d["esc"], 0))
+                counted.add(f["id"])
+                f["_pts"] = round(base + extra, 1)
+                scan_score += base
+                review_score += extra
+                continue
+        f.setdefault("confidence", "High")
+        f["_pts"] = points(f.get("severity", "Info"), f["confidence"], f.get("escalation"))
+        review_score += f["_pts"]
+    data["_scan_score"], data["_review_score"] = round(scan_score, 1), round(review_score, 1)
+
+    ids = {f.get("id") for f in findings}
+    rejected = {x.get("id"): x for x in data.get("rejected") or [] if isinstance(x, dict)}
+    for rid, r in fired.items():
+        if scan.needs_verdict(r) and rid not in ids:
+            if rid not in rejected:
+                errors.append(f"{rid}: сработавшее {r['sev']}-правило без вердикта: добавьте находку или запись в rejected с причиной")
+            elif not (rejected[rid].get("reason") or "").strip():
+                errors.append(f"{rid}: в rejected нет причины")
+    for rid in rejected:
+        if rid in ids:
+            warnings.append(f"{rid}: одновременно в findings и в rejected")
+
+    cov = data.get("coverage") or {}
+    read = {norm_path(x) for x in cov.get("read") or []}
+    skipped = {norm_path(x.get("path")): (x.get("reason") or "").strip() for x in cov.get("skipped") or [] if isinstance(x, dict)}
+    required = scan.required_files(Path(repo), res["files"], res["detected"], set(res["diff_ranges"]) if res["diff_ranges"] is not None else None)
+    data["_required"] = required
+    if not cov:
+        errors.append("нет coverage: перечислите прочитанные файлы в coverage.read (список обязательных печатает scan.py)")
+    else:
+        for g, items in required.items():
+            for path in items:
+                if path not in read and not skipped.get(path):
+                    errors.append(f"coverage: [{g}] {path} не прочитан и не указан в coverage.skipped с причиной")
+    return errors, warnings
+
+
+def coverage_html(data):
+    req = data.get("_required") or {}
+    cov = data.get("coverage") or {}
+    parts = []
+    if req:
+        rows = "".join(f'<tr><td>{esc(g)}</td><td>{esc(", ".join(items))}</td></tr>' for g, items in req.items())
+        n = sum(len(v) for v in req.values())
+        parts.append(f'<h3>Обязательные файлы ({n})</h3><table class="breakdown"><thead><tr><th>Группа</th><th>Файлы</th></tr></thead><tbody>{rows}</tbody></table>'
+                     f'<p class="scale-note">Прочитано файлов: {len(cov.get("read") or [])}. Обязательный список вычисляется сканером и одинаков для любого прогона.</p>')
+    if cov.get("skipped"):
+        parts.append("<h3>Пропущено с причиной</h3><ul>" + "".join(f'<li><code>{esc(x.get("path"))}</code>: {rich(x.get("reason"))}</li>' for x in cov["skipped"]) + "</ul>")
+    if data.get("rejected"):
+        parts.append("<h3>Кандидаты сканера, не подтверждённые кодом</h3><ul>" + "".join(f'<li><b>{esc(x.get("id"))}</b>: {rich(x.get("reason"))}</li>' for x in data["rejected"]) + "</ul>")
+    dev = [f for f in data.get("findings", []) if f.get("deviation")]
+    if dev:
+        parts.append("<h3>Отклонения от значений правила</h3><ul>" + "".join(f'<li><b>{esc(f.get("id"))}</b> ({esc(f.get("severity"))}/{esc(f.get("confidence"))}): {rich(f["deviation"])}</li>' for f in dev) + "</ul>")
+    return "".join(parts)
 
 
 LOC = re.compile(r"^\s*\.?/?([^\s:,]+):(\d+)")
@@ -399,10 +540,16 @@ def main():
         k = argv.index("--repo")
         repo = argv[k + 1]
         del argv[k:k + 2]
-    if len(argv) != 2:
+    no_verify = "--no-verify" in argv
+    if no_verify:
+        argv.remove("--no-verify")
+    if len(argv) != 2 or (repo is None and not no_verify):
         sys.exit(__doc__)
     data = json.loads(Path(argv[0]).read_text(encoding="utf-8"))
-    errors, warnings = validate(data, repo)
+    errors, warnings = prepare(data, repo, rules_dir) if repo else ([], [])
+    e2, w2 = validate(data, repo)
+    errors += e2
+    warnings += w2
     for w in warnings:
         print(f"ПРЕДУПРЕЖДЕНИЕ {w}", file=sys.stderr)
     if errors:
@@ -415,7 +562,8 @@ def main():
     out.write_text(render(data, load_rules(rules_dir)), encoding="utf-8")
     findings = [f for f in data.get("findings", []) if f.get("severity") in SEV]
     score = round(sum(finding_points(f) for f in findings), 1)
-    print(f"{out}: {len(findings)} находок, score {score:g}, grade {grade_of(score)}")
+    split = f" (Scan {data['_scan_score']:g} + Review {data['_review_score']:g})" if "_scan_score" in data else ""
+    print(f"{out}: {len(findings)} находок, score {score:g}{split}, grade {grade_of(score)}")
 
 
 if __name__ == "__main__":
